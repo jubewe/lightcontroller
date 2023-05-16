@@ -1,0 +1,7 @@
+Needed endpoints:
+
+GET /   index.html
+POST /update    headers: 
+        dmxAddresses    (single or multi, joined by ;)
+        colors          " - " (possible: one color for all dmxAddresses: multiple dmxAddresses but one color)
+        dimms           " - "
