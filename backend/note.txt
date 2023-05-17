@@ -1,4 +1,4 @@
-Needed endpoints:
+Required endpoints:
 
 GET /   index.html
 POST /update    headers: 

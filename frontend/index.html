@@ -18,6 +18,8 @@
 </html>
 <script>
     const url = new URL(document.baseURI);
+
+    // DMX Address Name;dmxAddressFixture (start)
     const lights = "SomeName0;0;group1\nSomeName1;1;group1";
     let groups = {};
     lights.split("\n").forEach(line => {
@@ -25,7 +27,19 @@
         if (!groups[splits[2]]) groups[splits[2]] = [];
         groups[splits[2]].push(line);
     });
-    let cached = {};
+
+    const ws = new WebSocket(`ws://${url.hostname}:81`);
+    ws.onopen = () => {
+        console.log("WS Opened");
+    };
+
+    ws.onmessage = (m) => {
+        console.log("WS Message", m);
+    };
+
+    ws.onerror = (e) => {
+        console.error("WS Error", e);
+    };
 
     class functions {
         static request = (u, options) => {
@@ -40,14 +54,46 @@
                     .catch(reject);
             });
         };
+
+        static getWhite = (hex) => {
+            if (hex.replace(/^#/, "") === "FFFFFF") return 255;
+            return 0;
+        };
+
+        static hexToRGBParsed = (hex) => {
+            let w = functions.getWhite(hex);
+            let rgb = functions.hexToRGB(hex);
+
+            let r = {
+                ...(w === 255 ? { r: 0, g: 0, b: 0 } : rgb),
+                w: w
+            };
+
+            return r;
+        };
+
+        static hexToRGB = (hex) => {
+            let r = {};
+            let hexParts = hex.replace(/^#/, "").match(/\w{2}/g);
+            hexParts.forEach((a, i) => r[["r", "g", "b"][i]] = parseInt(a, 16));
+            return r;
+        };
+
+        static updateLight = (addr, dimm, r, g, b, w, str) => {
+            let args = [addr, dimm, r, g, b, w, str];
+            let data = [].concat(args, Array(7).slice(0, (7 - args.length)));
+            console.log(data.join(";"));
+            ws.send(data.join(";"));
+        };
     };
 
     class scripts {
         static loadLights = () => {
-            lights.split("\n").forEach(line => {
+            lights.split("\n").forEach((line, i) => {
                 let [lightName, lightDmxAddress, lightGroupName] = line.split(";");
 
                 let controlsContainer = document.createElement("div");
+                controlsContainer.id = `controls${i}`;
                 controlsContainer.classList.add("controlsContainer");
 
                 let controlsTitle = document.createElement("h");
@@ -58,25 +104,17 @@
                 controlsGroupTitle.classList.add("controlsGroupTitle");
                 controlsGroupTitle.innerText = lightGroupName;
 
-                let controlsColorInput = elements.controlsColorInput();
-
-                let controlsDimmerInput = elements.controlsDimmerInput();
+                let controlsColorInput = elements.controlsColorInput(controlsContainer.id);
+                let controlsDimmerInput = elements.controlsDimmerInput(controlsContainer.id);
 
                 let controlsSubmit = document.createElement("button");
                 controlsSubmit.innerText = "Update";
                 controlsSubmit.onclick = () => {
-                    let pickedColor = controlsColorInput.value;
+                    let pickedColorHex = controlsColorInput.value;
+                    let pickedColor = functions.hexToRGBParsed(pickedColorHex);
                     let pickedDimm = controlsDimmerInput.value;
 
-                    console.log("submitting data for", lightName, "dmx address", lightDmxAddress, "color", pickedColor, "dimm", pickedDimm);
-                    functions.request("/update", {
-                        method: "POST",
-                        headers: {
-                            dmxAddresses: lightDmxAddress,
-                            colors: pickedColor,
-                            dimms: pickedDimm
-                        }
-                    });
+                    functions.updateLight(lightDmxAddress, pickedDimm, pickedColor.r, pickedColor.g, pickedColor.b, pickedColor.w, 0);
                 };
 
                 [controlsTitle, elements.br(), controlsGroupTitle, elements.br(), elements.spacer(), controlsColorInput, elements.br(), controlsDimmerInput, elements.br(), controlsSubmit].forEach(a => controlsContainer.appendChild(a));
@@ -88,6 +126,7 @@
         static loadLightGroups = () => {
             let groupControlsContainer = document.createElement("div");
             groupControlsContainer.classList.add("groupControlsContainer");
+            groupControlsContainer.id = "controlsGroup";
 
             let groupControlsTitle = document.createElement("h");
             groupControlsTitle.innerText = "Group Controls";
@@ -100,23 +139,29 @@
                 groupSelector.appendChild(groupOption);
             });
 
-            let groupControlsColorInput = elements.controlsColorInput();
-            let groupControlsDimmerInput = elements.controlsDimmerInput();
+            let groupControlsColorInput = elements.controlsColorInput("controlsGroup");
+            let groupControlsDimmerInput = elements.controlsDimmerInput("controlsGroup");
 
             let groupControlsSubmit = document.createElement("button");
             groupControlsSubmit.innerText = "Update";
-            groupControlsSubmit.onclick = () => {
-                let pickedColor = groupControlsColorInput.value;
+            groupControlsSubmit.onclick = () => { append(true) };
+            groupControlsColorInput.onchange = () => { append() };
+            groupControlsDimmerInput.onchange = () => { append() };
+
+            function append(update) {
+                let pickedColorHex = groupControlsColorInput.value;
+                let pickedColor = functions.hexToRGBParsed(pickedColorHex);
                 let pickedDimm = groupControlsDimmerInput.value;
                 let pickedGroup = groupSelector.value;
 
-                functions.request("/update", {
-                    method: "POST",
-                    headers: {
-                        dmxAddresses: groups[pickedGroup].map(a => a.split(";")[1]).join(";"),
-                        colors: pickedColor,
-                        dimms: pickedDimm
-                    }
+                if (update) functions.updateLight(groups[pickedGroup].map(a => a.split(";")[1]).join(","), pickedDimm, pickedColor.r, pickedColor.g, pickedColor.b, pickedColor.w, 0);
+
+                groups[pickedGroup].map(a => a.split(";")[1]).forEach(light => {
+                    let lightIndex = lights.split("\n").map((a, i) => [a.split(";")[1], i]).filter(a => `${a[1]}` === light)[0]?.[1];
+                    if (lightIndex === undefined) return;
+                    if (!document.getElementById(`controls${lightIndex}`)) return;
+                    document.getElementById(`controls${lightIndex}-color`).value = pickedColorHex;
+                    document.getElementById(`controls${lightIndex}-dimm`).value = pickedDimm;
                 });
             };
 
@@ -128,32 +173,42 @@
         static loadLightAll = () => {
             let allControlsContainer = document.createElement("div");
             allControlsContainer.classList.add("groupControlsContainer");
+            allControlsContainer.id = "controlsGroupAll";
 
             let allControlsTitle = document.createElement("h");
             allControlsTitle.innerText = "Master Controls";
 
-            let allControlsColorInput = elements.controlsColorInput();
-            let allControlsDimmerInput = elements.controlsDimmerInput();
+            let allControlsColorInput = elements.controlsColorInput("controlsGroupAll");
+            let allControlsDimmerInput = elements.controlsDimmerInput("controlsGroupAll");
 
             let allControlsSubmit = document.createElement("button");
             allControlsSubmit.innerText = "Update";
-            allControlsSubmit.onclick = () => {
-                let pickedColor = allControlsColorInput.value;
+            allControlsSubmit.onclick = () => { append(true) };
+            allControlsColorInput.onchange = () => { append() };
+            allControlsDimmerInput.onchange = () => { append() };
+
+            function append(update) {
+                let pickedColorHex = allControlsColorInput.value;
+                let pickedColor = functions.hexToRGBParsed(pickedColorHex);
                 let pickedDimm = allControlsDimmerInput.value;
 
-                functions.request("/update", {
-                    method: "POST",
-                    headers: {
-                        dmxAddresses: lights.split("\n").map(a => a.split(";")[1]).join(";"),
-                        colors: pickedColor,
-                        dimms: pickedDimm
-                    }
+
+                if (update) functions.updateLight(lights.split("\n").map(a => a.split(";")[1]).join(","), pickedDimm, pickedColor.r, pickedColor.g, pickedColor.b, pickedColor.w, 0);
+
+                lights.split("\n").map((light, i) => {
+                    if (!document.getElementById(`controls${i}`)) return;
+                    document.getElementById(`controls${i}-color`).value = pickedColorHex;
+                    document.getElementById(`controls${i}-dimm`).value = pickedDimm;
                 });
+                
+                if (!document.getElementById(`controlsGroup`)) return;
+                document.getElementById(`controlsGroup-color`).value = pickedColorHex;
+                document.getElementById(`controlsGroup-dimm`).value = pickedDimm;
             };
 
             [allControlsTitle, elements.br(), elements.spacer(), allControlsColorInput, elements.br(), allControlsDimmerInput, elements.br(), allControlsSubmit].forEach(a => allControlsContainer.appendChild(a));
 
-            document.querySelector("#lightcontrolsall").appendChild(allControlsContainer);
+            document.querySelector("#lightcontrolsgroup").appendChild(allControlsContainer);
         };
     };
 
@@ -161,8 +216,9 @@
         static br = () => { return document.createElement("br") };
         static spacer = () => { return document.createElement("spacer") };
 
-        static controlsColorInput = () => {
+        static controlsColorInput = (containerId) => {
             let controlsColorInput = document.createElement("input");
+            if (containerId) controlsColorInput.id = `${containerId}-color`;
             controlsColorInput.classList.add("controlsColorInput");
             controlsColorInput.type = "color";
             controlsColorInput.defaultValue = "#FFFFFF"
@@ -170,13 +226,14 @@
             return controlsColorInput;
         };
 
-        static controlsDimmerInput = () => {
+        static controlsDimmerInput = (containerId) => {
             let controlsDimmerInput = document.createElement("input");
+            if (containerId) controlsDimmerInput.id = `${containerId}-dimm`;
             controlsDimmerInput.classList.add("controlsDimmerInput");
             controlsDimmerInput.type = "range";
             controlsDimmerInput.value = "0";
             controlsDimmerInput.min = "0";
-            controlsDimmerInput.max = "100";
+            controlsDimmerInput.max = "255";
             controlsDimmerInput.defaultValue = "0";
 
             return controlsDimmerInput;
@@ -213,6 +270,7 @@
     .controlsContainer,
     .groupControlsContainer {
         padding: 3px;
+        margin: 3px;
         width: 25%;
         display: inline-block;
         border: 1px solid;
@@ -228,7 +286,17 @@
         font-size: large;
     }
 
+    .controlsDimmerInput {
+        display: inline-block;
+        width: 80%;
+        /* transform: rotate(90deg); */
+    }
+
     .controlsGroupTitle {
         font-size: small;
+    }
+
+    #lightcontrolsgroup div {
+        vertical-align: top;
     }
 </style>

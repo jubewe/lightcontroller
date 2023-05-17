@@ -1,0 +1,4 @@
+Arduino Lib espdmx:  https://github.com/Rickgg/ESP-Dmx
+→ Example:  https://github.com/Rickgg/ESP-Dmx/blob/master/examples/RGB_DMX/RGB_DMX.ino#L10 
+
+DMX Addresses:  https://www.thedmxwiki.com/dmx_basics/dmx_addresses 
