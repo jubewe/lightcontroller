@@ -1,4 +1,35 @@
-// Yoinked from https://github.com/Rickgg/ESP-Dmx/blob/master/examples/RGB_DMX/RGB_DMX.ino#L10
+/* This example joins two useful libraries for ESP8266 WiFi Module
+ * Websockets library for interfacing from either web interface or
+ * some external application and DMX library for controlling 
+ * devices on a DMX bus.
+ * 
+ * Install these libraries:
+ * https://github.com/Links2004/arduinoWebSockets
+ * https://github.com/Rickgg/ESP-Dmx
+ * 
+ * Web interface allow one to set the channel and control an RGB
+ * light, assuming channels for colors follow one after eachother
+ * 
+ * How to use:
+ * 1) Change WiFi settings accordingly to connect to your network
+ * 2) Connect an RS485 driver chip to GPIO02( D4 on Nodemcu 1.0)
+ * 3) Check out the serial output for IP or 
+ * visit http://rgbdmx.local if your device supports mDNS and 
+ * you are in the same local network
+
+Copyright Institute IRNAS Rače 2016 - info@irnas.eu
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
+
 
 #include <Arduino.h>
 #include <ESPDMX.h>
@@ -20,38 +51,26 @@ WebSocketsServer webSocket = WebSocketsServer(81);
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght) {
     switch(type) {
         case WStype_DISCONNECTED:
-            Serial.println("[WS] Client Disconnected");
+            Serial.println("Disconnected!");
             break;
         case WStype_CONNECTED:
-            Serial.println("[WS] Client connected");
+            Serial.println("Client connected!");
             // send message to client
             webSocket.sendTXT(num, "Connected");
             break;
         case WStype_TEXT: 
             // # is the start for this data       
             if(payload[0] == '#') {
-                // data received is comma separated, thats why we do pEnd+1 to start next value
+                //data received is comma separated, thats why we do pEnd+1 to start next value
                 char * pEnd;
-                uint32_t addresses = strtol ((const char *) &payload[1],&pEnd,16);
-                uint32_t dimm = strtol ((const char *) pEnd+1,&pEnd,16);
+                uint32_t address = strtol ((const char *) &payload[1],&pEnd,16);
                 uint32_t red = strtol ((const char *) pEnd+1,&pEnd,16);
                 uint32_t green = strtol ((const char *) pEnd+1,&pEnd,16);
                 uint32_t blue = strtol ((const char *) pEnd+1,&pEnd,16);
-                uint32_t white = strtol ((const char *) pEnd+1,&pEnd,16);
-                uint32_t strobe = strtol ((const char *) pEnd+1,&pEnd,16);
-                // write to DMX bus
-                
-                
-                // split addresses and write dimm, rgb, white and strobe for each one
-                addresses.split("")
-                // ... {
-                dmx.write(address, dimm);
-                dmx.write(address+1, red);
-                dmx.write(address+2, green);
-                dmx.write(address+3, blue);
-                dmx.write(address+4, white);
-                dmx.write(address+5, strobe);
-                // }
+                //write to DMX bus
+                dmx.write(address, red);
+                dmx.write(address+1, green);
+                dmx.write(address+2, blue);
                 dmx.update();
             }
             break;
