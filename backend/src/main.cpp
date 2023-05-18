@@ -1,76 +1,3 @@
-/*#include <Arduino.h>
-#include <WiFi.h>
-#include <WiFiMulti.h>
-#include <AsyncTCP.h>
-#include <AsyncWebSocket.h>
-#include <ESPmDNS.h>
-#include <ESPAsyncWebServer.h>
-
-// WiFi network settings
-const char* ssid = "SSID";
-const char* password = "password";
-
-DMXESPSerial dmx;
-WiFiMulti wifiMulti;
-AsyncWebServer server(80);
-AsyncWebSocket webSocket("/ws");
-
-void handleWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len) {
-  if (type == WS_EVT_DATA) {
-    AwsFrameInfo *info = (AwsFrameInfo *)arg;
-    if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT) {
-      if (data[0] == '#') {
-        char *pEnd;
-        uint32_t address = strtol((const char *)&data[1], &pEnd, 16);
-        uint32_t red = strtol((const char *)pEnd + 1, &pEnd, 16);
-        uint32_t green = strtol((const char *)pEnd + 1, &pEnd, 16);
-        uint32_t blue = strtol((const char *)pEnd + 1, &pEnd, 16);
-        dmx.write(address, red);
-        dmx.write(address + 1, green);
-        dmx.write(address + 2, blue);
-        dmx.update();
-      }
-    }
-  }
-}
-void setup() {
-  Serial.begin(115200);
-  Serial.println("this is a test");
-
-  WiFi.setHostname("rgbdmx");
-  WiFi.mode(WIFI_AP);
-  WiFi.softAP(ssid, password);
-
-  server.addHandler(&webSocket);
-  webSocket.onEvent(handleWebSocketEvent);
-
-  if (MDNS.begin("rgbdmx")) {
-    Serial.println("MDNS responder started");
-  }
-
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(200, "text/html", "<html><head><script>var connection = new WebSocket('ws://' + location.hostname + '/ws', ['arduino']);connection.onopen = function () {connection.send('Connect ' + new Date());};connection.onerror = function (error) {console.log('WebSocket Error ', error);};connection.onmessage = function (e) {console.log('Server: ', e.data);};id_array = new Array(\"addr\", \"r\", \"g\", \"b\");values = new Array(id_array.length);function prepareVar(id, position) {for (i = 0; i < id_array.length; i++) {var a = parseInt(document.getElementById(id_array[i]).value).toString(16);if (a.length < 2) {a = '0' + a; }values[i] = a; }sendVars(); }function sendVars() {var data = '#' + values;console.log('Data: ' + data);connection.send(data);}</script></head><body>LED Control:<br/><br/><form>Starting address: <input id=\"addr\" type=\"number\" placeholder=\"1\" min=\"0\" max=\"512\" step=\"1\" onchange=\"prepareVar('addr',0);;\" /><br/>R: <input id=\"r\" type=\"range\" min=\"0\" max=\"255\" step=\"1\" onchange=\"prepareVar('r',1);\" oninput=\"this.form.r_in.value=this.value\" /><input id=\"r_in\" type=\"number\" min=\"0\" max=\"255\" step=\"1\" onchange=\"prepareVar('r',1);\" oninput=\"this.form.r.value=this.value\" /><br/>G: <input id=\"g\" type=\"range\" min=\"0\" max=\"255\" step=\"1\" onchange=\"prepareVar('g',2);\" oninput=\"this.form.g_in.value=this.value\" /><input id=\"g_in\" type=\"number\" min=\"0\" max=\"255\" step=\"1\" onchange=\"prepareVar('g',2);\" oninput=\"this.form.g.value=this.value\" /><br/>B: <input id=\"b\" type=\"range\" min=\"0\" max=\"255\" step=\"1\" onchange=\"prepareVar('b',3);\" oninput=\"this.form.b_in.value=this.value\" /><input id=\"b_in\" type=\"number\" min=\"0\" max=\"255\" step=\"1\" onchange=\"prepareVar('b',3);\" oninput=\"this.form.b.value=this.value\" /><br/></form></body></html>");
-  });
-
-  server.begin();
-  MDNS.addService("http", "tcp", 80);
-  MDNS.addService("ws", "tcp", 81);
-
-  dmx.init(512); // initialize with bus length
-
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
-  Serial.print("RSSI: ");
-  Serial.print(WiFi.RSSI());
-  Serial.println(" dBm");
-}
-
-void loop() {
-  webSocket.cleanupClients();
-}
-
-*/
-
 // Import required libraries
 #include <WiFi.h>
 #include <AsyncTCP.h>
@@ -91,132 +18,7 @@ const int ledPin = 2;
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
 
-const char index_html[] PROGMEM = R"rawliteral(
-<!DOCTYPE HTML><html>
-<head>
-  <title>ESP Web Server</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" href="data:,">
-  <style>
-  html {
-    font-family: Arial, Helvetica, sans-serif;
-    text-align: center;
-  }
-  h1 {
-    font-size: 1.8rem;
-    color: white;
-  }
-  h2{
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #143642;
-  }
-  .topnav {
-    overflow: hidden;
-    background-color: #143642;
-  }
-  body {
-    margin: 0;
-  }
-  .content {
-    padding: 30px;
-    max-width: 600px;
-    margin: 0 auto;
-  }
-  .card {
-    background-color: #F8F7F9;;
-    box-shadow: 2px 2px 12px 1px rgba(140,140,140,.5);
-    padding-top:10px;
-    padding-bottom:20px;
-  }
-  .button {
-    padding: 15px 50px;
-    font-size: 24px;
-    text-align: center;
-    outline: none;
-    color: #fff;
-    background-color: #0f8b8d;
-    border: none;
-    border-radius: 5px;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    -webkit-tap-highlight-color: rgba(0,0,0,0);
-   }
-   /*.button:hover {background-color: #0f8b8d}*/
-   .button:active {
-     background-color: #0f8b8d;
-     box-shadow: 2 2px #CDCDCD;
-     transform: translateY(2px);
-   }
-   .state {
-     font-size: 1.5rem;
-     color:#8c8c8c;
-     font-weight: bold;
-   }
-  </style>
-<title>ESP Web Server</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="icon" href="data:,">
-</head>
-<body>
-  <div class="topnav">
-    <h1>ESP WebSocket Server</h1>
-  </div>
-  <div class="content">
-    <div class="card">
-      <h2>Output - GPIO 2</h2>
-      <p class="state">state: <span id="state">%STATE%</span></p>
-      <p><button id="button" class="button">Toggle</button></p>
-    </div>
-  </div>
-<script>
-  var gateway = `ws://${window.location.hostname}/ws`;
-  var websocket;
-  window.addEventListener('load', onLoad);
-  function initWebSocket() {
-    console.log('Trying to open a WebSocket connection...');
-    websocket = new WebSocket(gateway);
-    websocket.onopen    = onOpen;
-    websocket.onclose   = onClose;
-    websocket.onmessage = onMessage; // <-- add this line
-  }
-  function onOpen(event) {
-    console.log('Connection opened');
-  }
-  function onClose(event) {
-    console.log('Connection closed');
-    setTimeout(initWebSocket, 2000);
-  }
-  function onMessage(event) {
-    var state;
-    if (event.data == "1"){
-      state = "ON";
-    }
-    else{
-      state = "OFF";
-    }
-    document.getElementById('state').innerHTML = state;
-  }
-  function onLoad(event) {
-    initWebSocket();
-    initButton();
-  }
-  function initButton() {
-    document.getElementById('button').addEventListener('click', toggle);
-  }
-  function toggle(){
-    websocket.send('toggle');
-  }
-</script>
-</body>
-</html>
-)rawliteral";
-
-const char index_html_test[] PROGMEM = R"rawliteral(<!DOCTYPE html>
+const char index_html[] PROGMEM = R"rawliteral(<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -520,11 +322,13 @@ const char index_html_test[] PROGMEM = R"rawliteral(<!DOCTYPE html>
     }
 </style>)rawliteral";
 
+/*
 void notifyClients()
 {
   ws.textAll(String(ledState));
   Serial.println(ledState);
 }
+*/
 
 void splitStringToIntegers(const String &data, int addr[], int &dimm, int &r, int &g, int &b, int &w, int &str)
 {
@@ -556,7 +360,7 @@ void splitStringToIntegers(const String &data, int addr[], int &dimm, int &r, in
   w = tempW.toInt();
   str = tempStr.toInt();
 
-  // Split the 'addr' string by commas
+  // Split the 'tempAddr' string by commas
   // Find the position of commas in the string
   int comma1 = tempAddr.indexOf(',');
   int comma2 = tempAddr.indexOf(',', comma1 + 1);
@@ -577,7 +381,7 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len)
 
     // [addr, dimm, r, g, b, w, str]
 
-    int addr[3]; // Assuming there are up to 3 addresses
+    int addr[3]; //number of different addresses
     int dimm, r, g, b, w, str;
     int address_size;
 
@@ -607,26 +411,11 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len)
 
       Serial.print("String: ");
       Serial.println(str);
+      dmx.write(addr[i], r);
+      dmx.write(addr[i] + 1, g);
+      dmx.write(addr[i] + 2, b);
     }
-
-    if (data[0] == '#')
-    {
-      char *pEnd;
-      uint32_t address = strtol((const char *)&data[1], &pEnd, 16);
-      uint32_t red = strtol((const char *)pEnd + 1, &pEnd, 16);
-      uint32_t green = strtol((const char *)pEnd + 1, &pEnd, 16);
-      uint32_t blue = strtol((const char *)pEnd + 1, &pEnd, 16);
-      dmx.write(address, red);
-      dmx.write(address + 1, green);
-      dmx.write(address + 2, blue);
-      dmx.update();
-    }
-    data[len] = 0;
-    if (strcmp((char *)data, "toggle") == 0)
-    {
-      ledState = !ledState;
-      notifyClients();
-    }
+    dmx.update();
   }
 }
 
@@ -658,18 +447,13 @@ void initWebSocket()
 
 String processor(const String &var)
 {
+  /*
+  //replace strings in the html
   Serial.println(var);
   if (var == "STATE")
   {
-    if (ledState)
-    {
-      return "ON";
-    }
-    else
-    {
-      return "OFF";
-    }
   }
+  */
   return String();
 }
 
@@ -696,7 +480,7 @@ void setup()
 
   // Route for root / web page
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-            { request->send_P(200, "text/html", index_html_test, processor); });
+            { request->send_P(200, "text/html", index_html, processor); });
 
   // Start server
   server.begin();
@@ -705,5 +489,4 @@ void setup()
 void loop()
 {
   ws.cleanupClients();
-  digitalWrite(ledPin, ledState);
 }
