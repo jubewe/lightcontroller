@@ -137,3 +137,6 @@ dist/
 
 # package files
 package-lock.json
+
+#compiler cache
+backend/.pio/build_cache

@@ -10,6 +10,8 @@ DMXESPSerial dmx;
 // Replace with your network credentials
 const char *ssid = "lightcontroller";
 const char *password = "password";
+const int wifi_channel = 1;
+const int ssid_hidden = 0;
 
 bool ledState = 0;
 const int ledPin = 2;
@@ -470,7 +472,7 @@ void setup()
 
   Serial.println("Setting AP (Access Point)…");
   // Remove the password parameter, if you want the AP (Access Point) to be open
-  WiFi.softAP(ssid, password);
+  WiFi.softAP(ssid, password, wifi_channel, ssid_hidden);
 
   IPAddress IP = WiFi.softAPIP();
   Serial.print("AP IP address: ");
