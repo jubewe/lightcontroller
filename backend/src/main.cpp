@@ -1,9 +1,21 @@
-// Import required libraries
+/*
+This code is a firmware running on a master ESP32 module that allows the user to control 
+multiple DMX-Lights (RGB + W + STROBE) using a web interface. It also includes the capability 
+to communicate with other receiver ESP32 modules to control lights that are not directly connected 
+to the master ESP32 hosting the web interface.
+The firmware facilitates seamless coordination between the master and receiver modules, 
+enhancing the flexibility and convenience of controlling multiple DMX-Lights.
+*/
+
+// ESP-NOW code adapted from https://randomnerdtutorials.com/esp-now-esp32-arduino-ide/
+// WebSocket code adapted from https://randomnerdtutorials.com/esp32-websocket-server-arduino/
+
 #include <WiFi.h>
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <ESPDMX.h>
 #include <ESPmDNS.h>
+#include <esp_now.h>
 
 DMXESPSerial dmx;
 
@@ -13,13 +25,57 @@ const char *password = "password";
 const int wifi_channel = 1;
 const int ssid_hidden = 0;
 
-bool ledState = 0;
-const int ledPin = 2;
+// Add the MAC-Addresses of your receivers here
+uint8_t broadcastAddressReceiver1[] = {0xAC, 0x67, 0xB2, 0x2A, 0xD0, 0x68}; // AC:67:B2:2A:D0:68
+uint8_t broadcastAddressReceiver2[] = {0xAC, 0x67, 0xB2, 0x2A, 0xD0, 0x68}; // AC:67:B2:2A:D0:68
+
+esp_now_peer_info_t peerInfo1;
+esp_now_peer_info_t peerInfo2;
+
+void initPeers()
+{
+    memcpy(peerInfo1.peer_addr, broadcastAddressReceiver1, 6);
+    peerInfo1.channel = 0;
+    peerInfo1.encrypt = false;
+    memcpy(peerInfo2.peer_addr, broadcastAddressReceiver2, 6);
+    peerInfo2.channel = 0;
+    peerInfo2.encrypt = false;
+
+    // Add peer
+    if (esp_now_add_peer(&peerInfo1) != ESP_OK)
+    {
+        Serial.println("Failed to add peer 1");
+    }
+    if (esp_now_add_peer(&peerInfo2) != ESP_OK)
+    {
+        Serial.println("Failed to add peer 2");
+    }
+}
+typedef struct struct_message
+{
+    int addr[3];
+    int r;
+    int g;
+    int b;
+    int w;
+    int s;
+} struct_message;
+
+struct_message DMX_Data;
+
+void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status)
+{
+    Serial.print("\r\nLast Packet Send Status:\t");
+    Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
+}
+
 
 // Create AsyncWebServer object on port 80
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
 
+
+// complete code in /frontend
 const char index_html[] PROGMEM = R"rawliteral(<!DOCTYPE html>
 <html lang="en">
 
@@ -334,161 +390,212 @@ void notifyClients()
 
 void splitStringToIntegers(const String &data, int addr[], int &dimm, int &r, int &g, int &b, int &w, int &str)
 {
-  // Temporary variables to store intermediate values
-  String tempAddr, tempDimm, tempR, tempG, tempB, tempW, tempStr;
+    // Temporary variables to store intermediate values
+    String tempAddr, tempDimm, tempR, tempG, tempB, tempW, tempStr;
 
-  // Find the position of semicolons in the string
-  int semicolon1 = data.indexOf(';');
-  int semicolon2 = data.indexOf(';', semicolon1 + 1);
-  int semicolon3 = data.indexOf(';', semicolon2 + 1);
-  int semicolon4 = data.indexOf(';', semicolon3 + 1);
-  int semicolon5 = data.indexOf(';', semicolon4 + 1);
-  int semicolon6 = data.indexOf(';', semicolon5 + 1);
+    // Find the position of semicolons in the string
+    int semicolon1 = data.indexOf(';');
+    int semicolon2 = data.indexOf(';', semicolon1 + 1);
+    int semicolon3 = data.indexOf(';', semicolon2 + 1);
+    int semicolon4 = data.indexOf(';', semicolon3 + 1);
+    int semicolon5 = data.indexOf(';', semicolon4 + 1);
+    int semicolon6 = data.indexOf(';', semicolon5 + 1);
 
-  // Extract individual substrings between semicolons
-  tempAddr = data.substring(0, semicolon1);
-  tempDimm = data.substring(semicolon1 + 1, semicolon2);
-  tempR = data.substring(semicolon2 + 1, semicolon3);
-  tempG = data.substring(semicolon3 + 1, semicolon4);
-  tempB = data.substring(semicolon4 + 1, semicolon5);
-  tempW = data.substring(semicolon5 + 1, semicolon6);
-  tempStr = data.substring(semicolon6 + 1);
+    // Extract individual substrings between semicolons
+    tempAddr = data.substring(0, semicolon1);
+    tempDimm = data.substring(semicolon1 + 1, semicolon2);
+    tempR = data.substring(semicolon2 + 1, semicolon3);
+    tempG = data.substring(semicolon3 + 1, semicolon4);
+    tempB = data.substring(semicolon4 + 1, semicolon5);
+    tempW = data.substring(semicolon5 + 1, semicolon6);
+    tempStr = data.substring(semicolon6 + 1);
 
-  // Convert the substrings to integers
-  dimm = tempDimm.toInt();
-  r = tempR.toInt();
-  g = tempG.toInt();
-  b = tempB.toInt();
-  w = tempW.toInt();
-  str = tempStr.toInt();
+    // Convert the substrings to integers
+    dimm = tempDimm.toInt();
+    r = tempR.toInt();
+    g = tempG.toInt();
+    b = tempB.toInt();
+    w = tempW.toInt();
+    str = tempStr.toInt();
 
-  // Split the 'tempAddr' string by commas
-  // Find the position of commas in the string
-  int comma1 = tempAddr.indexOf(',');
-  int comma2 = tempAddr.indexOf(',', comma1 + 1);
-  int comma3 = tempAddr.indexOf(',', comma2 + 1);
+    // Split the 'tempAddr' string by commas
+    // Find the position of commas in the string
+    int comma1 = tempAddr.indexOf(',');
+    int comma2 = tempAddr.indexOf(',', comma1 + 1);
+    int comma3 = tempAddr.indexOf(',', comma2 + 1);
 
-  // Extract individual substrings between commas
-  addr[0] = tempAddr.substring(0, comma1).toInt();
-  addr[1] = tempAddr.substring(comma1 + 1, comma2).toInt();
-  addr[2] = tempAddr.substring(comma2 + 1, comma3).toInt();
+    // Extract individual substrings between commas
+    addr[0] = tempAddr.substring(0, comma1).toInt();
+    addr[1] = tempAddr.substring(comma1 + 1, comma2).toInt();
+    addr[2] = tempAddr.substring(comma2 + 1, comma3).toInt();
+}
+
+void outputDMX(int addr[], int r = 0, int g = 0, int b = 0, int w = 0, int s = 0)
+{
+    DMX_Data.addr[0] = addr[0];
+    DMX_Data.addr[1] = addr[1];
+    DMX_Data.addr[2] = addr[2];
+    DMX_Data.r = r;
+    DMX_Data.g = g;
+    DMX_Data.b = b;
+    DMX_Data.w = w;
+    DMX_Data.s = s;
+
+    esp_err_t result1 = esp_now_send(broadcastAddressReceiver1, (uint8_t *)&DMX_Data, sizeof(DMX_Data));
+    esp_err_t result2 = esp_now_send(broadcastAddressReceiver2, (uint8_t *)&DMX_Data, sizeof(DMX_Data));
+
+    Serial.print("Peer 1: ");
+    if (result1 == ESP_OK)
+    {
+        Serial.println("Sent with success");
+    }
+    else
+    {
+        Serial.println("Error sending the data");
+    }
+
+    Serial.print("Peer 2: ");
+    if (result2 == ESP_OK)
+    {
+        Serial.println("Sent with success");
+    }
+    else
+    {
+        Serial.println("Error sending the data");
+    }
+
+    for (int i = 0; i < (sizeof(addr) / sizeof(int)); i++)
+    {
+        dmx.write(addr[i], r);
+        dmx.write(addr[i] + 1, g);
+        dmx.write(addr[i] + 2, b);
+    }
+    dmx.update();
 }
 
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len)
 {
-  AwsFrameInfo *info = (AwsFrameInfo *)arg;
-  if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT)
-  {
-    Serial.println((char *)data);
-
-    // [addr, dimm, r, g, b, w, str]
-
-    int addr[3]; //number of different addresses
-    int dimm, r, g, b, w, str;
-    int address_size;
-
-    splitStringToIntegers((char *)data, addr, dimm, r, g, b, w, str);
-
-    // Print the extracted values
-    Serial.print("Addresses: ");
-    for (int i = 0; i < (sizeof(addr) / sizeof(int)); i++)
+    AwsFrameInfo *info = (AwsFrameInfo *)arg;
+    if (info->final && info->index == 0 && info->len == len && info->opcode == WS_TEXT)
     {
-      Serial.print(addr[i]);
-      Serial.println();
+        Serial.println((char *)data);
 
-      Serial.print("Dimm: ");
-      Serial.println(dimm);
+        // [addr, dimm, r, g, b, w, str]
 
-      Serial.print("R: ");
-      Serial.println(r);
+        int addr[3]; // number of different addresses
+        int dimm, r, g, b, w, str;
+        int address_size;
 
-      Serial.print("G: ");
-      Serial.println(g);
+        splitStringToIntegers((char *)data, addr, dimm, r, g, b, w, str);
+        outputDMX(addr, r, g, b, w, str);
 
-      Serial.print("B: ");
-      Serial.println(b);
+        // Print the extracted values
+        Serial.print("Addresses: ");
+        for (int i = 0; i < (sizeof(addr) / sizeof(int)); i++)
+        {
+            Serial.print("Address(" + String(i) + "): ");
 
-      Serial.print("W: ");
-      Serial.println(w);
+            Serial.print(addr[i]);
+            Serial.println();
 
-      Serial.print("String: ");
-      Serial.println(str);
-      dmx.write(addr[i], r);
-      dmx.write(addr[i] + 1, g);
-      dmx.write(addr[i] + 2, b);
+            Serial.print("Dimm: ");
+            Serial.println(dimm);
+
+            Serial.print("R: ");
+            Serial.println(r);
+
+            Serial.print("G: ");
+            Serial.println(g);
+
+            Serial.print("B: ");
+            Serial.println(b);
+
+            Serial.print("W: ");
+            Serial.println(w);
+
+            Serial.print("String: ");
+            Serial.println(str);
+        }
     }
-    dmx.update();
-  }
 }
 
 void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type,
              void *arg, uint8_t *data, size_t len)
 {
-  switch (type)
-  {
-  case WS_EVT_CONNECT:
-    Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
-    break;
-  case WS_EVT_DISCONNECT:
-    Serial.printf("WebSocket client #%u disconnected\n", client->id());
-    break;
-  case WS_EVT_DATA:
-    handleWebSocketMessage(arg, data, len);
-    break;
-  case WS_EVT_PONG:
-  case WS_EVT_ERROR:
-    break;
-  }
+    switch (type)
+    {
+    case WS_EVT_CONNECT:
+        Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
+        break;
+    case WS_EVT_DISCONNECT:
+        Serial.printf("WebSocket client #%u disconnected\n", client->id());
+        break;
+    case WS_EVT_DATA:
+        handleWebSocketMessage(arg, data, len);
+        break;
+    case WS_EVT_PONG:
+    case WS_EVT_ERROR:
+        break;
+    }
 }
 
 void initWebSocket()
 {
-  ws.onEvent(onEvent);
-  server.addHandler(&ws);
+    ws.onEvent(onEvent);
+    server.addHandler(&ws);
 }
 
 String processor(const String &var)
 {
-  /*
-  //replace strings in the html
-  Serial.println(var);
-  if (var == "STATE")
-  {
-  }
-  */
-  return String();
+    /*
+    //replace strings in the html
+    Serial.println(var);
+    if (var == "STATE")
+    {
+    }
+    */
+    return String();
 }
 
 void setup()
 {
-  // initialize dmx
-  dmx.init(512);
+    // initialize dmx
+    dmx.init(512);
 
-  // Serial port for debugging purposes
-  Serial.begin(115200);
+    // Serial port for debugging purposes
+    Serial.begin(115200);
 
-  pinMode(ledPin, OUTPUT);
-  digitalWrite(ledPin, LOW);
+    Serial.println("Setting up WiFi");
 
-  Serial.println("Setting AP (Access Point)…");
-  // Remove the password parameter, if you want the AP (Access Point) to be open
-  WiFi.softAP(ssid, password, wifi_channel, ssid_hidden);
+    WiFi.mode(WIFI_AP_STA);
 
-  IPAddress IP = WiFi.softAPIP();
-  Serial.print("AP IP address: ");
-  Serial.println(IP);
+    // Remove the password parameter, if you want the AP (Access Point) to be open
+    WiFi.softAP(ssid, password, wifi_channel, ssid_hidden);
 
-  initWebSocket();
+    IPAddress IP = WiFi.softAPIP();
+    Serial.print("AP IP address: ");
+    Serial.println(IP);
+    Serial.print("MAC address: ");
+    Serial.println(WiFi.macAddress());
+    initWebSocket();
 
-  // Route for root / web page
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
-            { request->send_P(200, "text/html", index_html, processor); });
+    // Route for root / web page
+    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
+              { request->send_P(200, "text/html", index_html, processor); });
 
-  // Start server
-  server.begin();
+    // Start server
+    server.begin();
+
+    if (esp_now_init() != ESP_OK)
+    {
+        Serial.println("Error initializing ESP-NOW");
+    }
+    esp_now_register_send_cb(OnDataSent);
+
+    initPeers();
 }
 
 void loop()
 {
-  ws.cleanupClients();
+    ws.cleanupClients();
 }
