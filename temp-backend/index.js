@@ -18,7 +18,7 @@ wsServer.on("connection", conn => {
     };
 });
 
-app.listen(2222, () => {
+app.listen(80, () => {
     console.log("express listening on port", 80);
 });
 

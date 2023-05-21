@@ -19,7 +19,7 @@
 <script>
     const url = new URL(document.baseURI);
 
-    // DMX Address Name;dmxAddressFixture (start)
+    /* DMX Address Name;dmxAddressFixture (start) */
     const lights = "SomeName0;0;group1\nSomeName1;1;group1";
     let groups = {};
     lights.split("\n").forEach(line => {
@@ -221,7 +221,7 @@
             if (containerId) controlsColorInput.id = `${containerId}-color`;
             controlsColorInput.classList.add("controlsColorInput");
             controlsColorInput.type = "color";
-            controlsColorInput.defaultValue = "#FFFFFF"
+            controlsColorInput.defaultValue = "#FFFFFF";
 
             return controlsColorInput;
         };
