@@ -28,7 +28,7 @@
         groups[splits[2]].push(line);
     });
 
-    new WebSocket(`ws://${window.location.hostname}/ws`);
+    const ws = new WebSocket(`ws://${window.location.hostname}/ws`);
     ws.onopen = () => {
         console.log("WS Opened");
     };
