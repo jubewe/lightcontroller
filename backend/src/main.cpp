@@ -246,12 +246,12 @@ void initWebSocket()
     server.addHandler(&ws);
 }
 
-String processor(const String& var)
+String processor(const String &var)
 {
     // replace strings in the html
     Serial.println(var);
     if (var == "CONFIG")
-    {   
+    {
         Serial.println(config);
         return "SomeName0;0;group1---SomeName1;1;group1---SomeName2;10;group3";
     }
@@ -262,6 +262,12 @@ void setup()
 {
     // initialize dmx
     dmx.init(512);
+
+    dmx.write(1, 0);
+    dmx.write(2, 0);
+    dmx.write(3, 0);
+    dmx.write(4, 255);
+    dmx.update();
 
     preferences.begin("config", false);
 
@@ -283,7 +289,6 @@ void setup()
     Serial.print("MAC address: ");
     Serial.println(WiFi.macAddress());
     initWebSocket();
-
 
     // Route for root / web page
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
