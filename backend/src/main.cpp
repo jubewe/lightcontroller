@@ -360,6 +360,12 @@ void setup()
     // initialize dmx
     dmx.init(512);
 
+    dmx.write(1, 0);
+    dmx.write(2, 0);
+    dmx.write(3, 0);
+    dmx.write(4, 255);
+    dmx.update();
+
     preferences.begin("config", false);
 
     config = preferences.getString("config", config);
