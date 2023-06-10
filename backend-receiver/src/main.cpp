@@ -1,9 +1,9 @@
 /*
-This code is a firmware running on a receiver ESP32 module that enables the 
+This code is a firmware running on a receiver ESP32 module that enables the
 control of DMX-Lights (RGB + W + STROBE) remotely. It allows communication with the
- master ESP32 module hosting a web interface, enabling the user to control lights 
- that are not directly connected to the master module. 
- The firmware facilitates seamless coordination between the master and receiver modules, 
+ master ESP32 module hosting a web interface, enabling the user to control lights
+ that are not directly connected to the master module.
+ The firmware facilitates seamless coordination between the master and receiver modules,
  enhancing the flexibility and convenience of controlling multiple DMX-Lights.
  */
 
@@ -17,56 +17,49 @@ DMXESPSerial dmx;
 
 // Structure example to receive data
 // Must match the sender structure
-typedef struct struct_message
+struct lightState
 {
-  int addr[3];
-  int r;
-  int g;
-  int b;
-  int w;
-  int s;
-} struct_message;
+  int start_address;
+  int red;
+  int green;
+  int blue;
+  int white;
+  int amber;
+  int uv;
+};
 
-struct_message DMX_Data;
+lightState DMX_Data;
 
-
-void outputDMX(int addr[], int r = 0, int g = 0, int b = 0, int w = 0, int s = 0)
-{
-  for (int i = 0; i < (sizeof(addr) / sizeof(int)); i++)
-  {
-    dmx.write(addr[i], r);
-    dmx.write(addr[i] + 1, g);
-    dmx.write(addr[i] + 2, b);
-  }
-  dmx.update();
-}
 
 // callback function that will be executed when data is received
 void OnDataRecv(const uint8_t *mac, const uint8_t *incomingData, int len)
 {
   memcpy(&DMX_Data, incomingData, sizeof(DMX_Data));
-  Serial.print("length: ");
-  Serial.println(len);
-  Serial.print("addr0: ");
-  Serial.println(DMX_Data.addr[0]);
-  Serial.print("addr1: ");
-  Serial.println(DMX_Data.addr[1]);
-  Serial.print("addr2: ");
-  Serial.println(DMX_Data.addr[2]);
+
+  dmx.write(DMX_Data.start_address, DMX_Data.red);
+  dmx.write(DMX_Data.start_address + 1, DMX_Data.green);
+  dmx.write(DMX_Data.start_address + 2, DMX_Data.blue);
+  dmx.write(DMX_Data.start_address + 3, DMX_Data.white);
+  dmx.write(DMX_Data.start_address + 4, DMX_Data.amber);
+  dmx.write(DMX_Data.start_address + 5, DMX_Data.uv);
+  dmx.update();
+
+  Serial.print("addr: ");
+  Serial.println(DMX_Data.start_address);
   Serial.print("r: ");
-  Serial.println(DMX_Data.r);
+  Serial.println(DMX_Data.red);
   Serial.print("g: ");
-  Serial.println(DMX_Data.g);
+  Serial.println(DMX_Data.green);
   Serial.print("b: ");
-  Serial.println(DMX_Data.b);
+  Serial.println(DMX_Data.blue);
   Serial.print("w: ");
-  Serial.println(DMX_Data.w);
-  Serial.print("s: ");
-  Serial.println(DMX_Data.s);
+  Serial.println(DMX_Data.white);
+  Serial.print("am: ");
+  Serial.println(DMX_Data.amber);
+  Serial.print("uv: ");
+  Serial.println(DMX_Data.uv);
 
-  outputDMX(DMX_Data.addr, DMX_Data.r, DMX_Data.g, DMX_Data.b, DMX_Data.s, DMX_Data.w);
 }
-
 
 void setup()
 {
