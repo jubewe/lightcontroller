@@ -1,0 +1,84 @@
+--- 1.0 Einleitung ---
+
+  Diese Software wurde von 2 Schülern der Schule / Bühnentechnik geschrieben und ist unter der Gnu General Public License Lizensiert (https://www.gnu.org/licenses/gpl-3.0.en.html)
+
+
+--- 1.1 Gruppen von Lichtern ---
+
+  Namen und Beschreibungen gesehen von Eingang Aula (Pausenhof)
+  → Außen = Weiter von Mitte der Aula weg
+  → Innen = Näher an Mitte der Aula
+
+
+Syntax: 
+* <Gruppe>: <Beschreibung>
+
+
+* Bühne: Alle Lichter an Traverse
+* Spots: Alle Spots vor der Bühne
+
+* Links: Alle Lichter links der Mitte der Aula (inkl. Spots)
+* Rechts: Alle Lichter rechts der Mitte der Aula (inkl. Spots)
+
+# Bühne:
+* Bühne Links: Alle Lichter links der Mitte der Traverse
+* Bühne Rechts: Alle Lichter rechts der Mitte der Traverse
+
+* Bühne Hinten: Alle Lichter auf hinterer Traverse
+* Bühne Vorne: Alle Lichter auf vorderer Traverse
+
+
+* Bühne Links Außen: Alle Lichter in Äußerster Linker Reihe
+* Bühne Links Innen: Alle Lichter in Linker Mittlerer Reihe
+
+* Bühne Rechts Außen: Alle Lichter in Äußerster Rechter Reihe
+* Bühne Rechts Innen: Alle Lichter in Rechter Mittlerer Reihe
+
+
+* Bühne Links Vorne: Alle Vorderen Lichter der Gruppe "Bühne Links"
+* Bühne Links Hinten: Alle Hinteren Lichter der Gruppe "Bühne Links"
+
+* Bühne Rechts Vorne: Alle Vorderen Lichter der Gruppe "Bühne Rechts"
+* Bühne Rechts Hinten: Alle Hinteren Lichter der Gruppe "Bühne Rechts"
+
+# Spots:
+* Spots Links: Alle Spots links der Mitte der Aula
+* Spots Rechts: Alle Spots rechts der Mitte der Aula
+
+* Spots Oben: Alle oberen Spots
+* Spots Unten: Alle unteren Spots
+
+
+--- 1.2 DMX-Addressen ---
+
+  Für jeden Scheinwerfer, egal ob LED oder nicht, sind je 6 Kanäle reserviert (für Kompatibilität von neuen LED Scheinwerfern)
+  → Bei den nicht-LEDs wird jedoch nur der jeweils Erste genutzt
+
+  Da das DMX-Protokoll genutzt wird, kann jedem Kanal ein Wert von 0 bis 255 zugewiesen werden
+
+  # Kanalbelegung der Kanäle (Normal): 
+    dimm,0,0,0,0,0
+
+  # Kanalbelegung der Kanäle (LED): 
+  # → Werte der Kanäle der LEDs werden von der Website gedimmt
+    rot,grün,blau,weiß,bernstein,uv
+    
+
+--- 1.2.2 Belegung der DMX-Addressen ---
+
+Syntax: 
+* <name>                   <dmx start>   <dmx end>
+
+Bühne Links Außen Hinten         1       6
+Bühne Links Innen Hinten         7       12
+Bühne Rechts Innen Hinten        13      18
+Bühne Rechts Außen Hinten        19      24
+Bühne Links Außen Vorne          25      30
+Bühne Links Innen Vorne          31      36
+Bühne Rechts Innen Vorne         37      42
+Bühne Rechts Außen Vorne         43      48
+
+* Spot Links Oben                  49      54
+* Spot Links Unten                 55      60
+* Spot Rechts Oben                 61      66
+* Spot Rechts Unten                67      72

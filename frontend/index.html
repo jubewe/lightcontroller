@@ -20,9 +20,9 @@
 <script>
     const url = new URL(document.baseURI);
 
-    const lights = "{{CONFIG}}";
+    // const lights = "{{CONFIG}}";
     /* const lights = "Left Top;1;6;Spots,Spots Left,Left---Left Bottom;7;6;Spots,Spots Left,Left---Right Top;13;6;Spots,Spots Right,Right---Right Bottom;19;6;Spots,Spots Right,Right"; */
-    /* const lights = "Left Top;1;6;Spots,Spots Left,Left---Left Bottom;7;6;Spots,Spots Left,Left---Right Top;13;6;Spots,Spots Right,Right---Right Bottom;19;6;Spots,Spots Right,Right---Testing;25;1;desd"; */
+    const lights = "Bühne Links Außen Hinten;1;1;Bühne,Links,Bühne Links,Bühne Hinten,Bühne Außen,Bühne Links Außen,Bühne Links Hinten---Bühne Links Innen Hinten;7;1;Bühne,Links,Bühne Links,Bühne Hinten,Bühne Innen,Bühne Links Innen,Bühne Links Hinten---Bühne Rechts Innen Hinten;13;1;Bühne,Rechts,Bühne Rechts,Bühne Hinten,Bühne Innen,Bühne Rechts Innen,Bühne Rechts Hinten---Bühne Rechts Außen Hinten;19;1;Bühne,Rechts,Bühne Rechts,Bühne Hinten,Bühne Außen,Bühne Rechts Außen,Bühne Rechts Hinten---Bühne Links Außen Vorne;25;1;Bühne,Links,Bühne Links,Bühne Vorne,Bühne Außen,Bühne Links Außen,Bühne Links Vorne---Bühne Links Innen Vorne;31;1;Bühne,Links,Bühne Links,Bühne Vorne,Bühne Innen,Bühne Links Innen,Bühne Links Vorne---Bühne Rechts Innen Vorne;37;1;Bühne,Rechts,Bühne Rechts,Bühne Vorne,Bühne Innen,Bühne Rechts Innen,Bühne Rechts Vorne---Bühne Rechts Außen Vorne;43;1;Bühne,Rechts,Bühne Rechts,Bühne Vorne,Bühne Außen,Bühne Rechts Außen,Bühne Rechts Vorne---Spot Links Oben;49;6;Spots,Spots Links,Spots Oben,Links---Spot Links Unten;55;6;Spots,Spots Links,Spots Unten,Links---Spot Rechts Oben;61;6;Spots,Spots Rechts,Spots Oben,Rechts---Spot Rechts Unten;67;6;Spots,Spots Rechts,Spots Unten,Rechts";
     console.debug("Loaded config", lights);
     const channels = [["Red", "r", "#ff0000", 0], ["Green", "g", "#00ff00", 0], ["Blue", "b", "#0000ff", 0], ["White", "w", "#ffffff", 255], ["Amber", "a", "#ffbf00", 0], ["UV", "u", "#5f4b8b", 0]];
 
@@ -39,6 +39,7 @@
     const channelsPerRGBLight = 6;
     let groups = {};
     let liveUpdate = false;
+    let groupToggle = true;
     lights.split("---").forEach(line => {
         let splits = line.split(";");
         let groups_ = splits[3];
@@ -364,6 +365,25 @@
             document.querySelector("body").appendChild(liveUpdateContainer);
         };
 
+        static loadGroupToggle = () => {
+            let groupToggleContainer = document.createElement("div");
+            groupToggleContainer.id = "groupToggleContainer";
+
+            let groupToggleTitle = document.createElement("h");
+            groupToggleTitle.id = "groupToggleTitle";
+            groupToggleTitle.innerText = "Show groups";
+
+            let groupToggleCheckbox = document.createElement("input");
+            groupToggleCheckbox.type = "checkbox";
+            groupToggleCheckbox.defaultChecked = true;
+
+            groupToggleCheckbox.onchange = () => { groupToggle = groupToggleCheckbox.checked; scripts.appendGroupToggleUpdate() };
+
+            [groupToggleTitle, groupToggleCheckbox].forEach(a => groupToggleContainer.appendChild(a));
+
+            document.querySelector("body").appendChild(groupToggleContainer);
+        };
+
         static appendLiveUpdate = () => {
             let updateButtons = document.querySelectorAll(".controlsSubmit");
             updateButtons.forEach(a => {
@@ -373,6 +393,13 @@
             let updateFades = document.querySelectorAll(".controlsFade");
             updateFades.forEach(a => {
                 if (liveUpdate) a.value = fadeLiveDefaultTime; else a.value = fadeDefaultTime;
+            });
+        };
+
+        static appendGroupToggleUpdate = () => {
+            let groupTitles = document.querySelectorAll(".controlsGroupTitle");
+            groupTitles.forEach(a => {
+                if (!groupToggle) a.classList.add("hidden"); else a.classList.remove("hidden");
             });
         };
     };
@@ -492,15 +519,15 @@
         };
     };
 
-    window.onload = () => { scripts.loadLights(); scripts.loadLightGroups(); scripts.loadLightAll(); scripts.loadLiveUpdate() };
+    window.onload = () => { scripts.loadLights(); scripts.loadLightGroups(); scripts.loadLightAll(); scripts.loadLiveUpdate(); scripts.loadGroupToggle() };
 </script>
 <style>
     * {
         scrollbar-width: thin;
         font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande", "Lucida Sans", Arial, sans-serif;
         border-radius: 10px;
-        word-break: normal;
-        line-break: anywhere;
+        /* word-break: normal; */
+        /* line-break: anywhere; */
         text-align: center;
         user-select: none;
         padding: 3px;
@@ -676,9 +703,9 @@
         /* height: 218px; */
     }
 
-    .controlsColorPickerContainer {
-        min-width: 205px;
-    }
+    /* .controlsColorPickerContainer { */
+        /* min-width: 205px; */
+    /* } */
 
     .controlsChannelsInputContainer {
         display: flex;
@@ -686,10 +713,12 @@
         justify-content: center;
         flex-direction: column;
         transform: rotate(-90deg);
-        /* row-gap: 3px; */
-        row-gap: 7.5px;
-        min-width: 160px;
+        row-gap: 1px;
+        /* row-gap: 7.5px; */
+        /* min-width: 160px; */
         /* width: min-content; */
+        justify-content: center;
+        aspect-ratio: 1/1.2;
     }
 
     .controlsChannelTitle {
@@ -699,7 +728,7 @@
 
     .controlsChannelTitlesContainer {
         display: flex;
-        gap: 10px;
+        /* gap: 10px; */
         justify-content: space-evenly;
     }
 
@@ -713,6 +742,14 @@
         z-index: 10;
         position: absolute;
         right: 10px;
+        top: 10px;
+    }
+
+    #groupToggleContainer {
+        background-color: #38a3a5;
+        z-index: 10;
+        position: absolute;
+        left: 10px;
         top: 10px;
     }
 </style>
