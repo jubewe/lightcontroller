@@ -13,6 +13,10 @@ control of DMX-Lights (RGB + W + STROBE) remotely. It allows communication with 
 #include <WiFi.h>
 #include <ESPDMX.h>
 
+#define redLEDPin 14
+#define greenLEDPin 13
+#define blueLEDPin 12
+
 DMXESPSerial dmx;
 
 // Structure example to receive data
@@ -30,12 +34,12 @@ struct lightState
 
 lightState DMX_Data;
 
-
 // callback function that will be executed when data is received
 void OnDataRecv(const uint8_t *mac, const uint8_t *incomingData, int len)
 {
   memcpy(&DMX_Data, incomingData, sizeof(DMX_Data));
-
+  digitalWrite(blueLEDPin, HIGH);
+  digitalWrite(greenLEDPin, HIGH);
   dmx.write(DMX_Data.start_address, DMX_Data.red);
   dmx.write(DMX_Data.start_address + 1, DMX_Data.green);
   dmx.write(DMX_Data.start_address + 2, DMX_Data.blue);
@@ -43,6 +47,7 @@ void OnDataRecv(const uint8_t *mac, const uint8_t *incomingData, int len)
   dmx.write(DMX_Data.start_address + 4, DMX_Data.amber);
   dmx.write(DMX_Data.start_address + 5, DMX_Data.uv);
   dmx.update();
+  digitalWrite(blueLEDPin, LOW);
 
   Serial.print("addr: ");
   Serial.println(DMX_Data.start_address);
@@ -58,14 +63,19 @@ void OnDataRecv(const uint8_t *mac, const uint8_t *incomingData, int len)
   Serial.println(DMX_Data.amber);
   Serial.print("uv: ");
   Serial.println(DMX_Data.uv);
-
+  digitalWrite(greenLEDPin, LOW);
 }
 
 void setup()
 {
   // Initialize Serial Monitor
   Serial.begin(115200);
-
+  pinMode(redLEDPin, OUTPUT);
+  pinMode(greenLEDPin, OUTPUT);
+  pinMode(blueLEDPin, OUTPUT);
+  digitalWrite(redLEDPin, HIGH);
+  delay(2000);
+  digitalWrite(redLEDPin, LOW);
   dmx.init(512);
 
   // Set device as a Wi-Fi Station
@@ -76,6 +86,7 @@ void setup()
   if (esp_now_init() != ESP_OK)
   {
     Serial.println("Error initializing ESP-NOW");
+    digitalWrite(redLEDPin, HIGH);
     return;
   }
 
