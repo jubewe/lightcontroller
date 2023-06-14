@@ -72,14 +72,14 @@ Syntax:
 Syntax: 
 * <name>                   <dmx start>   <dmx end>
 
-Bühne Links Außen Hinten         1       6
-Bühne Links Innen Hinten         7       12
-Bühne Rechts Innen Hinten        13      18
-Bühne Rechts Außen Hinten        19      24
-Bühne Links Außen Vorne          25      30
-Bühne Links Innen Vorne          31      36
-Bühne Rechts Innen Vorne         37      42
-Bühne Rechts Außen Vorne         43      48
+* Bühne Links Außen Hinten         1       6
+* Bühne Links Innen Hinten         7       12
+* Bühne Rechts Innen Hinten        13      18
+* Bühne Rechts Außen Hinten        19      24
+* Bühne Links Außen Vorne          25      30
+* Bühne Links Innen Vorne          31      36
+* Bühne Rechts Innen Vorne         37      42
+* Bühne Rechts Außen Vorne         43      48
 
 * Spot Links Oben                  49      54
 * Spot Links Unten                 55      60
