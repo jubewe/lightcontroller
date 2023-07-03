@@ -28,7 +28,7 @@ const char *password = "password";
 const int wifi_channel = 1;
 const int ssid_hidden = 0;
 
-String config = "SomeName0;0;group1\nSomeName1;1;group1";
+String config = "";
 
 bool newData = false;
 
@@ -351,13 +351,10 @@ void initWebSocket()
 
 String processor(const String &var)
 {
-    // replace strings in the html
     Serial.println(var);
+
     if (var == "CONFIG")
-    {
-        Serial.println(config);
-        return "SomeName0;0;group1---SomeName1;1;group1---SomeName2;10;group3";
-    }
+        return "";
     return String();
 }
 
@@ -365,6 +362,20 @@ void setup()
 {
     // initialize dmx
     dmx.init(512);
+    // debugging
+    while (false)
+    {
+        dmx.write(1, random(0, 255));
+        dmx.write(2, random(0, 255));
+        dmx.write(3, random(0, 255));
+        dmx.write(4, random(0, 255));
+        dmx.write(5, random(0, 255));
+        dmx.write(6, random(0, 255));
+        dmx.write(7, random(0, 255));
+        dmx.write(8, random(0, 255));
+        dmx.update();
+        delay(10);
+    }
     outputDMX();
     pinMode(redLEDPin, OUTPUT);
     pinMode(greenLEDPin, OUTPUT);
