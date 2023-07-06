@@ -34,10 +34,11 @@ bool newData = false;
 
 // Add the MAC-Addresses of your receivers here
 uint8_t broadcastAddressReceiver1[] = {0x58, 0xCF, 0x79, 0xB3, 0x90, 0xF8};
-uint8_t broadcastAddressReceiver2[] = {0x58, 0xCF, 0x79, 0xB3, 0xA5, 0xBA};
-
+uint8_t broadcastAddressReceiver2[] = {0x58, 0xCF, 0x79, 0xB3, 0x92, 0x88};
+uint8_t broadcastAddressReceiver3[] = {0x58, 0xCF, 0x79, 0xB3, 0x91, 0xEC};
 esp_now_peer_info_t peerInfo1;
 esp_now_peer_info_t peerInfo2;
+esp_now_peer_info_t peerInfo3;
 
 void initPeers()
 {
@@ -47,6 +48,9 @@ void initPeers()
     memcpy(peerInfo2.peer_addr, broadcastAddressReceiver2, 6);
     peerInfo2.channel = 0;
     peerInfo2.encrypt = false;
+    memcpy(peerInfo3.peer_addr, broadcastAddressReceiver3, 6);
+    peerInfo3.channel = 0;
+    peerInfo3.encrypt = false;
 
     // Add peer
     if (esp_now_add_peer(&peerInfo1) != ESP_OK)
@@ -56,6 +60,10 @@ void initPeers()
     if (esp_now_add_peer(&peerInfo2) != ESP_OK)
     {
         Serial.println("Failed to add peer 2");
+    }
+    if (esp_now_add_peer(&peerInfo3) != ESP_OK)
+    {
+        Serial.println("Failed to add peer 3");
     }
 }
 
@@ -90,7 +98,7 @@ int numAddrChanged = 0;
 
 void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status)
 {
-    Serial.print("\r\nLast Packet Send Status:\t");
+    Serial.print("Last Packet Send Status (" + String((char *)mac_addr) + "):");
     Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
     if (status == ESP_NOW_SEND_FAIL)
     {
@@ -208,7 +216,9 @@ void esp_now_send_DMX()
 {
     esp_err_t result1 = esp_now_send(broadcastAddressReceiver1, (uint8_t *)&DMX_Data, sizeof(DMX_Data));
     esp_err_t result2 = esp_now_send(broadcastAddressReceiver2, (uint8_t *)&DMX_Data, sizeof(DMX_Data));
-    Serial.print("sending... ");
+    esp_err_t result3 = esp_now_send(broadcastAddressReceiver3, (uint8_t *)&DMX_Data, sizeof(DMX_Data));
+
+    Serial.print("sending using ESP_NOW... ");
 }
 
 void outputDMX()
@@ -330,7 +340,8 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len)
         {
             notifyClientsRefresh();
         }
-        else if (command = "restart"){
+        else if (command = "restart")
+        {
             ESP.restart();
         }
         else
