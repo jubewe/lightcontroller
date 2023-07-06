@@ -1,5 +1,6 @@
 # Custom
 .vscode
+pcb/pcb-backups/
 
 # Logs
 logs
