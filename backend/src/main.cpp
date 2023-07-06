@@ -330,6 +330,9 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len)
         {
             notifyClientsRefresh();
         }
+        else if (command = "restart"){
+            ESP.restart();
+        }
         else
         {
             int addr[3]; // number of different addresses
