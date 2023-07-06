@@ -316,6 +316,7 @@ void outputDMX()
             lightStatesOld[i].uv = uv;
         }
     }
+    notifyClientsRefresh();
 }
 
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len)
@@ -336,12 +337,13 @@ void handleWebSocketMessage(void *arg, uint8_t *data, size_t len)
         // Extract individual substrings between semicolons
         String command = data_str.substring(0, semicolon1);
 
-        if (command = "refresh")
+        if (command == "refresh")
         {
             notifyClientsRefresh();
         }
-        else if (command = "restart")
+        else if (command == "restart")
         {
+            Serial.println("restarting...");
             ESP.restart();
         }
         else
