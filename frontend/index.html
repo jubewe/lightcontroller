@@ -27,13 +27,19 @@
 <script>
   const url = new URL(document.baseURI);
 
-  // const lights = "{{CONFIG}}";
-  /* const lights = "Left Top;1;6;Spots,Spots Left,Left---Left Bottom;7;6;Spots,Spots Left,Left---Right Top;13;6;Spots,Spots Right,Right---Right Bottom;19;6;Spots,Spots Right,Right"; */
   const splitter = "---";
-  const lights =
-    "Bühne Links Außen Hinten;1;1;Bühne,Links,Bühne Links,Bühne Hinten,Bühne Außen,Bühne Links Außen,Bühne Links Hinten---Bühne Links Innen Hinten;7;1;Bühne,Links,Bühne Links,Bühne Hinten,Bühne Innen,Bühne Links Innen,Bühne Links Hinten---Bühne Rechts Innen Hinten;13;1;Bühne,Rechts,Bühne Rechts,Bühne Hinten,Bühne Innen,Bühne Rechts Innen,Bühne Rechts Hinten---Bühne Rechts Außen Hinten;19;1;Bühne,Rechts,Bühne Rechts,Bühne Hinten,Bühne Außen,Bühne Rechts Außen,Bühne Rechts Hinten---Bühne Links Außen Vorne;25;1;Bühne,Links,Bühne Links,Bühne Vorne,Bühne Außen,Bühne Links Außen,Bühne Links Vorne---Bühne Links Innen Vorne;31;1;Bühne,Links,Bühne Links,Bühne Vorne,Bühne Innen,Bühne Links Innen,Bühne Links Vorne---Bühne Rechts Innen Vorne;37;1;Bühne,Rechts,Bühne Rechts,Bühne Vorne,Bühne Innen,Bühne Rechts Innen,Bühne Rechts Vorne---Bühne Rechts Außen Vorne;43;1;Bühne,Rechts,Bühne Rechts,Bühne Vorne,Bühne Außen,Bühne Rechts Außen,Bühne Rechts Vorne---Spot Links Oben;49;6;Spots,Spots Links,Spots Oben,Links---Spot Links Unten;55;6;Spots,Spots Links,Spots Unten,Links---Spot Rechts Oben;61;6;Spots,Spots Rechts,Spots Oben,Rechts---Spot Rechts Unten;67;6;Spots,Spots Rechts,Spots Unten,Rechts";
-  console.debug("Loaded config", lights);
-  const channels = [
+  const presetAddressSplitter = "-";
+  const presetChannelSplitter = ",";
+  const presetEntrySplitter = ";";
+
+  let elementsLoaded;
+
+  const lightConfig =
+    "Spot Links Außen Hinten;1;6;Bühne,Links,Bühne Links,Bühne Hinten,Bühne Außen,Bühne Links Außen,Bühne Links Hinten---Bühne Links Innen Hinten;7;1;Bühne,Links,Bühne Links,Bühne Hinten,Bühne Innen,Bühne Links Innen,Bühne Links Hinten---Bühne Rechts Innen Hinten;13;1;Bühne,Rechts,Bühne Rechts,Bühne Hinten,Bühne Innen,Bühne Rechts Innen,Bühne Rechts Hinten---Spot Rechts Außen Hinten;19;6;Bühne,Rechts,Bühne Rechts,Bühne Hinten,Bühne Außen,Bühne Rechts Außen,Bühne Rechts Hinten---Bühne Links Außen Vorne;25;1;Bühne,Links,Bühne Links,Bühne Vorne,Bühne Außen,Bühne Links Außen,Bühne Links Vorne---Bühne Links Innen Vorne;31;1;Bühne,Links,Bühne Links,Bühne Vorne,Bühne Innen,Bühne Links Innen,Bühne Links Vorne---Bühne Rechts Innen Vorne;37;1;Bühne,Rechts,Bühne Rechts,Bühne Vorne,Bühne Innen,Bühne Rechts Innen,Bühne Rechts Vorne---Bühne Rechts Außen Vorne;43;1;Bühne,Rechts,Bühne Rechts,Bühne Vorne,Bühne Außen,Bühne Rechts Außen,Bühne Rechts Vorne---Spot Links Oben;49;6;Spots,Spots Links,Spots Oben,Links---Spot Links Unten;55;6;Spots,Spots Links,Spots Unten,Links---Spot Rechts Oben;61;6;Spots,Spots Rechts,Spots Oben,Rechts---Spot Rechts Unten;67;6;Spots,Spots Rechts,Spots Unten,Rechts---Spot Bühne Vorne Links;73;6;Bühne,Links,Bühne Links,Bühne Vorne,Bühne Links Vorne---------Spot Bühne Vorne Rechts;79;6;Bühne,Rechts,Bühne Rechts,Bühne Vorne,Bühne Rechts Vorne";
+
+  // old (07/06/2023) "Bühne Links Außen Hinten;1;1;Bühne,Links,Bühne Links,Bühne Hinten,Bühne Außen,Bühne Links Außen,Bühne Links Hinten---Bühne Links Innen Hinten;7;1;Bühne,Links,Bühne Links,Bühne Hinten,Bühne Innen,Bühne Links Innen,Bühne Links Hinten---Bühne Rechts Innen Hinten;13;1;Bühne,Rechts,Bühne Rechts,Bühne Hinten,Bühne Innen,Bühne Rechts Innen,Bühne Rechts Hinten---Bühne Rechts Außen Hinten;19;1;Bühne,Rechts,Bühne Rechts,Bühne Hinten,Bühne Außen,Bühne Rechts Außen,Bühne Rechts Hinten---Bühne Links Außen Vorne;25;1;Bühne,Links,Bühne Links,Bühne Vorne,Bühne Außen,Bühne Links Außen,Bühne Links Vorne---Bühne Links Innen Vorne;31;1;Bühne,Links,Bühne Links,Bühne Vorne,Bühne Innen,Bühne Links Innen,Bühne Links Vorne---Bühne Rechts Innen Vorne;37;1;Bühne,Rechts,Bühne Rechts,Bühne Vorne,Bühne Innen,Bühne Rechts Innen,Bühne Rechts Vorne---Bühne Rechts Außen Vorne;43;1;Bühne,Rechts,Bühne Rechts,Bühne Vorne,Bühne Außen,Bühne Rechts Außen,Bühne Rechts Vorne---Spot Links Oben;49;6;Spots,Spots Links,Spots Oben,Links---Spot Links Unten;55;6;Spots,Spots Links,Spots Unten,Links---Spot Rechts Oben;61;6;Spots,Spots Rechts,Spots Oben,Rechts---Spot Rechts Unten;67;6;Spots,Spots Rechts,Spots Unten,Rechts";
+  console.debug("Loaded config", lightConfig);
+  const RGBchannels = [
     ["Red", "r", "#ff0000", 0],
     ["Green", "g", "#00ff00", 0],
     ["Blue", "b", "#0000ff", 0],
@@ -56,6 +62,13 @@
   let groups = {};
   let liveUpdate = false;
   let groupToggle = true;
+  let channelsToggle = true;
+  let lightStates = {
+    channels: {},
+    groups: {},
+    master: "",
+  };
+  // group: <dmxaddr.join("-")>,r,g,b,w,a,u,dimm,fade;...
 
   let fullOn = 0;
   let fullOff = 0;
@@ -68,33 +81,24 @@
     },
   };
   // 0 = disabled, 1 = active, 2 = overridden by other mode
+
+  let lights = lightConfig;
   lights.split(splitter).forEach((line) => {
     let splits = line.split(";");
     let groups_ = splits[3];
-    if (groups_.length === 0) return;
+    if ((groups_?.length ?? 0) === 0) return;
     groups_.split(",").forEach((group) => {
       if (!groups[encodeURI(group)]) groups[encodeURI(group)] = [];
       groups[encodeURI(group)].push(line);
     });
   });
 
-  console.debug("Groups", groups);
+  lights = lights
+    .split(splitter)
+    .filter((a) => a.length > 0)
+    .join(splitter);
 
-  const ws = new WebSocket(`ws://127.0.0.1:81`);
-  // const ws = new WebSocket(`ws://${window.location.hostname}/ws`);
-  try {
-    ws.onopen = () => {
-      console.log("WS Opened");
-    };
-    ws.onmessage = (m) => {
-      console.log("WS Message", m);
-    };
-    ws.onerror = (e) => {
-      console.error("WS Error", e);
-    };
-  } catch (e) {
-    console.error(e);
-  }
+  console.debug("Groups", groups);
 
   class functions {
     static request = (u, options) => {
@@ -166,7 +170,7 @@
 
     static getValuesFromChannels = (containerID) => {
       let r = {};
-      channels.forEach((channel) => {
+      RGBchannels.forEach((channel) => {
         r[channel[1]] = document.getElementById(
           `${containerID}-channels-${channel[1]}`
         ).value;
@@ -184,13 +188,13 @@
 
     static appendHexToChannels = (containerID, hex) => {
       let hex_ = hex ?? document.getElementById(`${containerID}-color`).value;
-      let rgbw = functions.hexToRGBParsed(hex_);
+      let rgb = functions.hexToRGBParsed(hex_);
 
       let r = {};
-      Object.keys(rgbw).forEach((channel) => {
+      Object.keys(rgb).forEach((channel) => {
         document.getElementById(`${containerID}-channels-${channel}`).value =
-          rgbw[channel];
-        r[channel] = rgbw[channel];
+          rgb[channel];
+        r[channel] = rgb[channel];
       });
       return r;
     };
@@ -215,6 +219,7 @@
     };
 
     static updateLight = (addr, dimm, r, g, b, w, a, u, fade) => {
+      if (addr.length === 0) return;
       let msg = this.parseWSUpdateMessage(addr, dimm, r, g, b, w, a, u, fade);
       console.debug("WS Update RGB", msg.join(";"));
       ws?.send(msg.join(";"));
@@ -230,6 +235,7 @@
     }
 
     static updateLightnoRGB = (addr, dimm, fade) => {
+      if (addr.length === 0) return;
       console.debug(
         "WS Update Non-RGB",
         [
@@ -243,6 +249,7 @@
     };
 
     static updateLightVal = (addr, vals, fade) => {
+      if (addr.length === 0) return;
       let vals_ = vals;
       if (!Array.isArray(vals_)) vals_ = [...Array(6)].map((a) => vals);
       console.debug("WS Update Val", [addr, ...vals_, fade * 1000].join(";"));
@@ -343,11 +350,283 @@
     static enableElem = (elem) => {
       elem.removeAttribute("disabled");
     };
+
+    static getAddrChanNum = (addr) => {
+      let a = lights
+        .split(splitter)
+        .filter((a) => a.split(";")[1] === addr.toString());
+
+      return a[0]?.split(";")[2];
+    };
+
+    static getLightByAddr = (addr) => {
+      return lights
+        .split(splitter)
+        .filter((a) => a.split(";")[1] === addr.toString())[0];
+    };
+
+    static updateGroups = (
+      pickedDimm,
+      pickedFade,
+      pickedColorHex,
+      pickedChannels
+    ) => {
+      if (!document.getElementById(`controlsGroup`)) return;
+      document.getElementById(`controlsGroup-color`).value = pickedColorHex;
+      document.getElementById(`controlsGroup-dimm`).value = pickedDimm;
+      document.getElementById(`controlsGroup-fade`).value = pickedFade;
+      functions.appendToChannels(`controlsGroup`, pickedChannels);
+    };
+
+    static isRGB = (addr) => {
+      return this.getAddrChanNum(addr) === "6";
+    };
+
+    static appendFromStrings = (s) => {
+      // ws: <dmxstart>,r,g,b,w,a,u;<dmxstart>...
+      let groupName;
+      let dmxStrings = s
+        .split(presetEntrySplitter)
+        .map((a) => a.split(presetChannelSplitter));
+      let normalDMXStrings = dmxStrings;
+
+      let controlsChannelsRGB = ["r", "g", "b", "w", "a", "u"];
+      let controlsClassNames = ["dimm", "fade"];
+
+      let controlsClassNamesRGB = [
+        ...controlsChannelsRGB.map((a) => `channels-${a}`),
+        ...controlsClassNames,
+      ];
+
+      normalDMXStrings.forEach((normalDMXString) => append(normalDMXString));
+
+      function append(dmxString) {
+        let [dmxStart, r, g, b, w, a, u, dimm, fade] = dmxString;
+        let dmxStart_ = dmxStart.split(presetAddressSplitter);
+        let groupName;
+
+        if (typeof dmxStart === "string" && !/^\d$/.test(dmxStart)) {
+          switch (dmxStart.split(":")[0]) {
+            case "master": {
+              dmxStart_ = lights.split(splitter).map((a) => a.split(";")[1]);
+
+              groupName = "controlsGroupAll";
+
+              break;
+            }
+
+            default: {
+              dmxStart_ = dmxStart
+                .split(":")
+                .at(-1)
+                .split(presetAddressSplitter);
+
+              groupName = "controlsGroup";
+
+              break;
+            }
+          }
+        }
+
+        let isRGB =
+          (groupName ?? undefined) !== undefined || functions.isRGB(dmxStart);
+
+        let groupName_ = groupName ?? `controls${dmxStart}`;
+
+        let elementIDs = controlsClassNamesRGB.map(
+          (className) => `${groupName_}-${className}`
+        );
+
+        let elements = elementIDs.map((className) =>
+          functions.getElementByID(className)
+        );
+
+        elements.forEach((element, i2) => {
+          if (!element) return;
+          element.value = dmxString[i2 + 1]; // +1: skip dmxStart
+        });
+
+        if (isRGB) {
+          functions.appendValuesFromChannels(groupName_);
+
+          let lights_ = dmxStart_;
+
+          let hex = functions.RGBToHex(r, g, b);
+          let channelValues = functions.getValuesFromChannels(groupName_);
+
+          if (lights_.length > 0) {
+            functions.append(
+              lights_.map((addr) => functions.getLightByAddr(addr)),
+              dimm,
+              fade,
+              hex,
+              channelValues
+            );
+
+            functions.append(
+              "master",
+              dimm,
+              fade,
+              hex,
+              channelValues,
+              "controlsGroup"
+            );
+
+            functions.updateGroups(dimm, fade, hex, channelValues);
+          }
+        }
+      }
+    };
+
+    static getElementByID = (id) => {
+      return document.getElementById(id) ?? undefined;
+    };
+
+    static convertToArray = (a) => {
+      if (!a) return [];
+      return !Array.isArray(a) ? [a] : a;
+    };
+
+    static append = (
+      lights_,
+      pickedDimm,
+      pickedFade,
+      pickedColorHex,
+      pickedChannels,
+      groupName
+    ) => {
+      functions.convertToArray(lights_).map((light) => {
+        let dmxStart = light?.split(";")?.[1] ?? light;
+        let groupName_ = groupName ?? `controls${dmxStart}`;
+
+        if (!document.getElementById(groupName_))
+          return console.error("could not find controls", dmxStart, light);
+
+        let isRGB = parseInt(light.split(";")[2]) > 1;
+
+        document.getElementById(`${groupName_}-dimm`).value = pickedDimm;
+        document.getElementById(`${groupName_}-fade`).value = pickedFade;
+        if (!isRGB) return;
+        document.getElementById(`${groupName_}-color`).value = pickedColorHex;
+        functions.appendToChannels(groupName_, pickedChannels);
+      });
+    };
+
+    static addKeysToObjectSync = (object, keys, value) => {
+      let keys_ = functions.convertToArray(keys);
+
+      let parentObj = object;
+      for (let i = 0; i < keys_.length - 1; i++) {
+        let key = keys_[i];
+        if (!(key in parentObj)) parentObj[key] = {};
+
+        parentObj = parentObj[key];
+      }
+
+      parentObj[keys_[keys_.length - 1]] = value;
+      return object;
+    };
+
+    static getKeyFromObjectSync = (object, keys) => {
+      let keys_ = functions.convertToArray(keys);
+      let value = object;
+      for (let i = 0; i < keys_.length; i++) {
+        if (value?.hasOwnProperty(keys_[i])) {
+          value = value[keys_[i]];
+        } else {
+          return undefined;
+        }
+      }
+
+      return value;
+    };
+
+    static deleteKeyFromObjectSync = (object, keys) => {
+      let keys_ = functions.convertToArray(keys);
+      let parentObj = object;
+      for (let i = 0; i < keys_.length - 1; i++) {
+        if (!(keys_[i] in parentObj)) {
+          return undefined;
+        } else {
+          parentObj = parentObj[keys_[i]];
+        }
+      }
+      let delkey = keys_[keys_.length - 1];
+      delete parentObj[delkey];
+
+      return object;
+    };
+
+    static localStorage = class {
+      static #key = "l";
+
+      static init = () => {
+        let newStorage = { presets: {} };
+        this.setStorage(newStorage);
+      };
+
+      static initIfNonexistent = () => {
+        if (!(this.getStorage() ?? undefined)) this.init();
+      };
+
+      static getStorage = () => {
+        let item = localStorage.getItem(this.#key);
+        if (!(item ?? undefined)) return null;
+        return JSON.parse(localStorage.getItem(this.#key));
+      };
+
+      static setStorage = (newStorage) => {
+        localStorage.setItem(this.#key, JSON.stringify(newStorage));
+      };
+
+      static getKey = (keypath) => {
+        let storage = this.getStorage();
+        return functions.getKeyFromObjectSync(storage, keypath);
+      };
+
+      static setKey = (keypath, value) => {
+        this.initIfNonexistent();
+        let storage = this.getStorage();
+        let newstorage = functions.addKeysToObjectSync(storage, keypath, value);
+        this.setStorage(newstorage);
+      };
+
+      static deleteKey = (keypath) => {
+        let storage = this.getStorage();
+        let newstorage = functions.deleteKeyFromObjectSync(storage, keypath);
+        this.setStorage(newstorage);
+      };
+
+      static emptyCache = () => {
+        functions.localStorage.setKey("cache", {});
+      };
+    };
+
+    static getPresets = () => {
+      return this.localStorage.getKey(["presets"]) ?? {};
+    };
+
+    static setPreset = (presetName, presetValue) => {
+      return this.localStorage.setKey(
+        ["presets", encodeURI(presetName)],
+        presetValue
+      );
+    };
+
+    static deletePreset = (presetName) => {
+      return this.localStorage.deleteKey(["presets", encodeURI(presetName)]);
+    };
+
+    static getPreset = (presetName) => {
+      return this.localStorage.getKey(["presets", encodeURI(presetName)]);
+    };
   }
 
   class scripts {
     static loadLights = () => {
-      lights.split(splitter).forEach((line, i) => {
+      lightConfig.split(splitter).forEach((line, i) => {
+        let isEmpty = line.length === 0;
+
         let [
           lightName,
           lightDmxAddress,
@@ -357,8 +636,15 @@
         let isRGB = parseInt(lightChannels) > 1;
 
         let controlsContainer = document.createElement("div");
-        controlsContainer.id = `controls${lightDmxAddress}`;
+        if (!isEmpty) controlsContainer.id = `controls${lightDmxAddress}`;
         controlsContainer.classList.add("controlsContainer");
+
+        if (isEmpty) {
+          controlsContainer.classList.add("empty");
+          return document
+            .querySelector("#lightcontrols")
+            .appendChild(controlsContainer);
+        }
 
         let controlsContainerTop = document.createElement("div");
         controlsContainerTop.classList.add("controlsContainerTop");
@@ -368,11 +654,12 @@
 
         let controlsTitle = document.createElement("h");
         controlsTitle.classList.add("controlsTitle");
-        controlsTitle.innerText = lightName;
+        if (!isEmpty) controlsTitle.innerText = lightName;
 
         let controlsGroupTitle = document.createElement("h");
         controlsGroupTitle.classList.add("controlsGroupTitle");
-        controlsGroupTitle.innerText = lightGroupName.split(",").join(", ");
+        if (!isEmpty)
+          controlsGroupTitle.innerText = lightGroupName.split(",").join(", ");
 
         let controlsColorInput = elements.controlsColorInput(
           controlsContainer.id
@@ -423,6 +710,13 @@
           let isHeld = functions.getQuickState("_all", "isHeld") === 1;
 
           if (!isRGB) {
+            lightStates.channels[lightDmxAddress] = [
+              lightDmxAddress,
+              ...Array(6).map((a) => ""),
+              pickedDimm,
+              pickedFade,
+            ].join(presetChannelSplitter);
+
             if (isHeld) {
               quickStates._all.heldActions.push([
                 [],
@@ -448,6 +742,14 @@
           let pickedChannels = functions.getValuesFromChannels(
             controlsContainer.id
           );
+
+          let { r, b, g, w, a, u } = pickedChannels;
+          lightStates.channels[lightDmxAddress] = [
+            lightDmxAddress,
+            ...Object.values({ r, b, g, w, a, u }),
+            pickedDimm,
+            pickedFade,
+          ].join(presetChannelSplitter);
 
           if (isHeld) {
             quickStates._all.heldActions.push([
@@ -566,10 +868,12 @@
             groupControlsContainer.id,
             pickedColorHex
           );
+
         if (fromChannels)
           pickedColorHex = functions.appendValuesFromChannels(
             groupControlsContainer.id
           );
+
         let pickedChannels = functions.getValuesFromChannels(
           groupControlsContainer.id
         );
@@ -588,7 +892,17 @@
           .filter((a) => parseInt(a.split(";")[2]) === 1)
           .map((a) => a.split(";")[1]);
 
-        if (isHeld)
+        let { r, g, b, w, a, u } = pickedChannels;
+        lightStates.groups[groupName()] = [
+          `group:${groupName()}:${[...rgbChans, ...noRGBChans].join(
+            presetAddressSplitter
+          )}`,
+          ...Object.values({ r, g, b, w, a, u }),
+          pickedDimm,
+          pickedFade,
+        ].join(presetChannelSplitter);
+
+        if (isHeld) {
           return quickStates[groupName()].heldActions.push([
             [
               rgbChans,
@@ -599,6 +913,7 @@
 
             [noRGBChans, pickedDimm, pickedFade],
           ]);
+        }
 
         if (quickOverrideVal) {
           functions.updateLightVal(rgbChans, quickOverrideVal[0], 0);
@@ -620,26 +935,13 @@
             );
         }
 
-        groups[pickedGroup]
-          .map((a) => a.split(";")[1])
-          .forEach((light) => {
-            let l = lights
-              .split(splitter)
-              .filter((a) => a.split(";")[1] === light)[0]
-              ?.split(";");
-            let i = l?.[1];
-
-            if (i === undefined) return;
-            if (!document.getElementById(`controls${i}`)) return;
-            let isRGB = parseInt(l[2]) > 1;
-            document.getElementById(`controls${i}-dimm`).value = pickedDimm;
-            document.getElementById(`controls${i}-fade`).value = pickedFade;
-            if (!isRGB) return;
-            document.getElementById(
-              `controls${i}-color`
-            ).value = pickedColorHex;
-            functions.appendToChannels(`controls${i}`, pickedChannels);
-          });
+        functions.append(
+          groups[pickedGroup],
+          pickedDimm,
+          pickedFade,
+          pickedColorHex,
+          pickedChannels
+        );
       }
 
       [
@@ -749,6 +1051,15 @@
           .filter((a) => parseInt(a.split(";")[2]) === 1)
           .map((a) => a.split(";")[1]);
 
+        let { r, g, b, w, a, u } = pickedChannels;
+
+        lightStates.master = [
+          `master:${[...rgbChans, ...noRGBChans].join(presetAddressSplitter)}`,
+          ...Object.values({ r, g, b, w, a, u }),
+          pickedDimm,
+          pickedFade,
+        ].join(presetChannelSplitter);
+
         if (isHeld)
           return quickStates[groupName()].heldActions.push([
             [
@@ -780,27 +1091,20 @@
             );
         }
 
-        lights
-          .split(splitter)
-          .map((a) => a.split(";"))
-          .map((light) => {
-            let i = light[1];
-            if (!document.getElementById(`controls${i}`)) return;
-            let isRGB = parseInt(light[2]) > 1;
-            document.getElementById(`controls${i}-dimm`).value = pickedDimm;
-            document.getElementById(`controls${i}-fade`).value = pickedFade;
-            if (!isRGB) return;
-            document.getElementById(
-              `controls${i}-color`
-            ).value = pickedColorHex;
-            functions.appendToChannels(`controls${i}`, pickedChannels);
-          });
+        functions.updateGroups(
+          pickedDimm,
+          pickedFade,
+          pickedColorHex,
+          pickedChannels
+        );
 
-        if (!document.getElementById(`controlsGroup`)) return;
-        document.getElementById(`controlsGroup-color`).value = pickedColorHex;
-        document.getElementById(`controlsGroup-dimm`).value = pickedDimm;
-        document.getElementById(`controlsGroup-fade`).value = pickedFade;
-        functions.appendToChannels(`controlsGroup`, pickedChannels);
+        functions.append(
+          lights.split(splitter),
+          pickedDimm,
+          pickedFade,
+          pickedColorHex,
+          pickedChannels
+        );
       }
 
       [
@@ -841,13 +1145,13 @@
       document.querySelector("body").appendChild(liveUpdateContainer);
     };
 
-    static loadGroupToggle = () => {
+    static appendGroupToggle = () => {
       let groupToggleContainer = document.createElement("div");
       groupToggleContainer.id = "groupToggleContainer";
 
       let groupToggleTitle = document.createElement("h");
       groupToggleTitle.id = "groupToggleTitle";
-      groupToggleTitle.innerText = "Show groups";
+      groupToggleTitle.innerText = "Show Groups";
 
       let groupToggleCheckbox = document.createElement("input");
       groupToggleCheckbox.type = "checkbox";
@@ -863,6 +1167,30 @@
       );
 
       document.querySelector("body").appendChild(groupToggleContainer);
+    };
+
+    static appendChannelsToggle = () => {
+      let channelsToggleContainer = document.createElement("div");
+      channelsToggleContainer.id = "channelsToggleContainer";
+
+      let channelsToggleTitle = document.createElement("h");
+      channelsToggleTitle.id = "groupToggleTitle";
+      channelsToggleTitle.innerText = "Show Channels";
+
+      let channelsToggleCheckbox = document.createElement("input");
+      channelsToggleCheckbox.type = "checkbox";
+      channelsToggleCheckbox.defaultChecked = true;
+
+      channelsToggleCheckbox.onchange = () => {
+        channelsToggle = channelsToggleCheckbox.checked;
+        scripts.appendChannelsToggleUpdate();
+      };
+
+      [channelsToggleTitle, channelsToggleCheckbox].forEach((a) =>
+        channelsToggleContainer.appendChild(a)
+      );
+
+      document.querySelector("body").appendChild(channelsToggleContainer);
     };
 
     static appendLiveUpdate = () => {
@@ -885,6 +1213,226 @@
         if (!groupToggle) a.classList.add("hidden");
         else a.classList.remove("hidden");
       });
+    };
+
+    static appendChannelsToggleUpdate = () => {
+      let channelsInputs = document.querySelectorAll(
+        ".controlsChannelsContainer"
+      );
+      channelsInputs.forEach((a) => {
+        if (!channelsToggle) a.classList.add("hidden");
+        else a.classList.remove("hidden");
+      });
+    };
+
+    static appendPresetSelector = () => {
+      let presetContainer = document.createElement("div");
+      presetContainer.id = "presetContainer";
+
+      let presetSelector = document.createElement("select");
+      presetSelector.id = "presetSelector";
+      (() => {
+        let defaultPreset = document.createElement("option");
+        defaultPreset.innerText = "- Select Preset -";
+        defaultPreset.value = "";
+        defaultPreset.defaultSelected = true;
+        defaultPreset.selected = true;
+        presetSelector.appendChild(defaultPreset);
+
+        presetSelector.onchange = (ev) => {
+          let selectedPreset = presetSelector.value;
+          appendPreset(selectedPreset);
+        };
+      })();
+
+      function appendPreset(selectedPreset) {
+        if (selectedPreset === "") return;
+        console.debug("Selected preset", selectedPreset);
+
+        let preset = functions.getPreset(selectedPreset);
+        if (!preset)
+          return console.error("preset not found by name", selectedPreset);
+
+        let s = "";
+        s += Object.values(preset.channels).join(presetEntrySplitter);
+        s += Object.values(preset.groups).join(presetEntrySplitter);
+        s +=
+          preset.master ??
+          Array(9)
+            .map((a) => "")
+            .join(presetChannelSplitter);
+
+        if (s.length === 0)
+          return console.error(`Not appending preset since it's empty`);
+
+        functions.appendFromStrings(s);
+      }
+
+      let presetSave = document.createElement("button");
+      (() => {
+        presetSave.innerText = "Save";
+        presetSave.onclick = () => {
+          let presetNameDefault = `preset${
+            Object.keys(functions.getPresets()).length + 1
+          }`;
+          let presetName =
+            window.prompt("Preset Name", presetNameDefault) ??
+            presetNameDefault;
+
+          functions.setPreset(presetName, lightStates);
+
+          this.appendPresets(presetName);
+        };
+      })();
+
+      let presetDelete = document.createElement("button");
+      (() => {
+        presetDelete.innerText = "Delete";
+
+        presetDelete.onclick = () => {
+          functions.deletePreset(presetSelector.value);
+
+          this.appendPresets();
+        };
+      })();
+
+      let presetReload = document.createElement("button");
+      (() => {
+        presetReload.innerText = "Reload";
+
+        presetReload.onclick = () => {
+          appendPreset(presetSelector.value);
+        };
+      })();
+
+      let presetRename = document.createElement("button");
+      (() => {
+        presetRename.innerText = "Rename";
+        presetRename.onclick = () => {
+          let presetNameOld = presetSelector.value;
+
+          let preset = functions.getPreset(presetNameOld);
+
+          let presetNameNew = window.prompt("New Preset name", presetNameOld);
+          if (presetNameNew.length === 0 || presetNameOld === presetNameNew)
+            return;
+
+          functions.deletePreset(presetNameOld);
+          functions.setPreset(presetNameNew, preset);
+
+          this.appendPresets(presetNameNew);
+        };
+      })();
+
+      let presetImport = document.createElement("button");
+      (() => {
+        presetImport.innerText = "Import";
+
+        presetImport.onclick = () => {
+          let presetNameDefault = `preset${
+            Object.keys(functions.getPresets()).length + 1
+          }`;
+
+          let presetName =
+            window.prompt("Preset Name", presetNameDefault) ??
+            presetNameDefault;
+
+          let presetRaw = window.prompt("Preset");
+          if (!presetRaw) return;
+
+          let preset;
+          try {
+            preset = JSON.parse(presetRaw);
+          } catch (e) {
+            return console.error("Preset not parseable as JSON");
+          }
+
+          functions.setPreset(presetName, preset);
+
+          this.appendPresets(presetName);
+        };
+      })();
+
+      let presetExport = document.createElement("button");
+      (() => {
+        presetExport.innerText = "Export";
+        presetExport.onclick = () => {
+          let presetName = presetSelector.value;
+          let preset = functions.getPreset(presetName);
+
+          if (!preset) return;
+
+          navigator.clipboard.writeText(JSON.stringify(preset));
+        };
+      })();
+
+      [
+        presetSave,
+        presetDelete,
+        presetReload,
+        presetRename,
+        presetImport,
+        presetExport,
+      ].forEach((a) => {
+        a.classList.add("presetButton");
+      });
+
+      [
+        presetSelector,
+        elements.br(),
+        presetSave,
+        presetDelete,
+        presetReload,
+        presetRename,
+        elements.br(),
+        presetImport,
+        presetExport,
+      ].forEach((a) => presetContainer.appendChild(a));
+
+      document.querySelector("body").appendChild(presetContainer);
+
+      scripts.appendPresets();
+    };
+
+    static appendRestartRefreshButtons = () => {
+      let container = document.createElement("div");
+      container.id = "restartRefreshContainer";
+
+      let refreshButton = document.createElement("button");
+      refreshButton.id = "refreshbutton";
+      refreshButton.innerText = "Refresh";
+
+      refreshButton.onclick = () => {
+        ws.send("refresh");
+      };
+
+      let restartButton = document.createElement("button");
+      restartButton.id = "restartbutton";
+      restartButton.innerText = "Restart";
+
+      restartButton.onclick = () => {
+        ws.send("restart");
+      };
+
+      [refreshButton, restartButton].forEach((a) => container.appendChild(a));
+      document.querySelector("body").appendChild(container);
+    };
+
+    static appendPresets = (selectPreset) => {
+      let presetSelector = document.getElementById("presetSelector");
+      [...presetSelector.childNodes].slice(1).forEach((a) => a.remove());
+
+      let presets = functions.getPresets() ?? {};
+
+      Object.keys(presets).forEach((preset) => {
+        let presetElem = document.createElement("option");
+        presetElem.innerText = preset;
+        presetElem.value = preset;
+
+        presetSelector.appendChild(presetElem);
+      });
+
+      if (selectPreset) presetSelector.value = selectPreset;
     };
   }
 
@@ -936,7 +1484,7 @@
         channelTitlesContainer.id = `${containerID}-channel-titles`;
       channelTitlesContainer.classList.add("controlsChannelTitlesContainer");
 
-      channels.forEach((channel) => {
+      RGBchannels.forEach((channel) => {
         let channelInput = document.createElement("input");
         if (containerID)
           channelInput.id = `${channelsInputContainer.id}-${channel[1]}`;
@@ -1149,13 +1697,43 @@
     };
   }
 
-  window.onload = () => {
+  elementsLoaded = new Promise((resolve) => {
     scripts.loadLights();
     scripts.loadLightGroups();
     scripts.loadLightAll();
     scripts.loadLiveUpdateToggle();
-    scripts.loadGroupToggle();
-  };
+    scripts.appendGroupToggle();
+    scripts.appendChannelsToggle();
+    scripts.appendPresetSelector();
+    scripts.appendRestartRefreshButtons();
+    resolve();
+    elementsLoaded = undefined;
+  });
+
+  // const ws = new WebSocket(`ws://127.0.0.1:81`);
+  const ws = new WebSocket(`ws://${window.location.hostname}/ws`);
+  try {
+    ws.onopen = () => {
+      console.log("WS Opened");
+    };
+    ws.onmessage = async (m) => {
+      if (elementsLoaded) await elementsLoaded;
+      handleWSMessage(m);
+    };
+
+    function handleWSMessage(m) {
+      let msg = m.data;
+      if (msg.startsWith("refresh")) {
+        functions.appendFromStrings(msg.replace(/^refresh;/, ""));
+        console.debug(`WS: Refresh appended`);
+      }
+    }
+    ws.onerror = (e) => {
+      console.error("WS Error", e);
+    };
+  } catch (e) {
+    console.error(e);
+  }
 </script>
 <style>
   * {
@@ -1171,7 +1749,12 @@
   }
 
   .hidden {
-    display: none;
+    display: none !important;
+  }
+
+  button,
+  input[type='checkbox'] {
+    cursor: pointer;
   }
 
   @media screen and (-webkit-min-device-pixel-ratio: 0) {
@@ -1243,6 +1826,11 @@
     place-items: center;
     flex-wrap: wrap;
     justify-content: center;
+    /* align-items: stretch; */
+    align-items: flex-start;
+  }
+
+  #lightcontrolsgroup {
     align-items: stretch;
   }
 
@@ -1398,8 +1986,8 @@
     background-color: #38a3a5;
     z-index: 10;
     position: absolute;
-    right: 10px;
-    top: 10px;
+    left: 10px;
+    top: 40px;
   }
 
   #groupToggleContainer {
@@ -1407,6 +1995,36 @@
     z-index: 10;
     position: absolute;
     left: 10px;
+    top: 10px;
+  }
+
+  #presetContainer {
+    z-index: 10;
+    position: absolute;
+    /* left: 0; */
+    right: 10px;
+    top: 5px;
+  }
+
+  #presetContainer select {
+    width: 100%;
+  }
+
+  #presetContainer button {
+    border: transparent;
+    margin: 2px;
+  }
+
+  #presetContainer select {
+    border: transparent;
+    background-color: #38a3a5;
+  }
+
+  #channelsToggleContainer {
+    background-color: #38a3a5;
+    z-index: 10;
+    position: absolute;
+    left: 150px;
     top: 10px;
   }
 
@@ -1461,5 +2079,23 @@
 
   .controlsContainerTop {
     height: 55%;
+  }
+
+  .empty {
+    background: transparent;
+    border: transparent;
+  }
+
+  #restartRefreshContainer {
+    position: absolute;
+    top: 5px;
+    left: 0;
+    right: 0;
+  }
+
+  #restartRefreshContainer button {
+    border: transparent;
+    margin: 3px;
+    background-color: red;
   }
 </style>
