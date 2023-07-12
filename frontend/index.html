@@ -1731,6 +1731,12 @@
     ws.onerror = (e) => {
       console.error("WS Error", e);
     };
+    ws.onclose = () => {
+      window.alert(
+        "WebSocket connection lost - further updates will not be sent" +
+          "\n\nTo reconnect, make sure the lightcontroller is turned on and you are connected via WiFi"
+      );
+    };
   } catch (e) {
     console.error(e);
   }
@@ -1753,7 +1759,7 @@
   }
 
   button,
-  input[type='checkbox'] {
+  input[type="checkbox"] {
     cursor: pointer;
   }
 
