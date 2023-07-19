@@ -35,8 +35,10 @@
   let elementsLoaded;
 
   const lightConfig =
-    "Spot Links Außen Hinten;1;6;Bühne,Links,Bühne Links,Bühne Hinten,Bühne Außen,Bühne Links Außen,Bühne Links Hinten---Bühne Links Innen Hinten;7;1;Bühne,Links,Bühne Links,Bühne Hinten,Bühne Innen,Bühne Links Innen,Bühne Links Hinten---Bühne Rechts Innen Hinten;13;1;Bühne,Rechts,Bühne Rechts,Bühne Hinten,Bühne Innen,Bühne Rechts Innen,Bühne Rechts Hinten---Spot Rechts Außen Hinten;19;6;Bühne,Rechts,Bühne Rechts,Bühne Hinten,Bühne Außen,Bühne Rechts Außen,Bühne Rechts Hinten---Bühne Links Außen Vorne;25;1;Bühne,Links,Bühne Links,Bühne Vorne,Bühne Außen,Bühne Links Außen,Bühne Links Vorne---Bühne Links Innen Vorne;31;1;Bühne,Links,Bühne Links,Bühne Vorne,Bühne Innen,Bühne Links Innen,Bühne Links Vorne---Bühne Rechts Innen Vorne;37;1;Bühne,Rechts,Bühne Rechts,Bühne Vorne,Bühne Innen,Bühne Rechts Innen,Bühne Rechts Vorne---Bühne Rechts Außen Vorne;43;1;Bühne,Rechts,Bühne Rechts,Bühne Vorne,Bühne Außen,Bühne Rechts Außen,Bühne Rechts Vorne---Spot Links Oben;49;6;Spots,Spots Links,Spots Oben,Links---Spot Links Unten;55;6;Spots,Spots Links,Spots Unten,Links---Spot Rechts Oben;61;6;Spots,Spots Rechts,Spots Oben,Rechts---Spot Rechts Unten;67;6;Spots,Spots Rechts,Spots Unten,Rechts---Spot Bühne Vorne Links;73;6;Bühne,Links,Bühne Links,Bühne Vorne,Bühne Links Vorne---------Spot Bühne Vorne Rechts;79;6;Bühne,Rechts,Bühne Rechts,Bühne Vorne,Bühne Rechts Vorne";
+    "Spot Links Außen Hinten;1;6;Bühne,Links,Bühne Links,Bühne Hinten,Bühne Außen,Bühne Links Außen,Bühne Links Hinten---Spot Links Innen Vorne;31;6;Bühne,Links,Bühne Links,Bühne Vorne,Bühne Innen,Bühne Links Innen,Bühne Links Vorne---Spot Rechts Innen Vorne;37;6;Bühne,Rechts,Bühne Rechts,Bühne Vorne,Bühne Innen,Bühne Rechts Innen,Bühne Rechts Vorne---Spot Rechts Außen Hinten;19;6;Bühne,Rechts,Bühne Rechts,Bühne Hinten,Bühne Außen,Bühne Rechts Außen,Bühne Rechts Hinten---Spot Links Oben;49;6;Spots,Spots Links,Spots Oben,Links---Spot Links Unten;55;6;Spots,Spots Links,Spots Unten,Links---Spot Rechts Oben;61;6;Spots,Spots Rechts,Spots Oben,Rechts---Spot Rechts Unten;67;6;Spots,Spots Rechts,Spots Unten,Rechts";
 
+  // old(07/19/2023) "Spot Links Außen Hinten;1;6;Bühne,Links,Bühne Links,Bühne Hinten,Bühne Außen,Bühne Links Außen,Bühne Links Hinten---------Spot Rechts Außen Hinten;19;6;Bühne,Rechts,Bühne Rechts,Bühne Hinten,Bühne Außen,Bühne Rechts Außen,Bühne Rechts Hinten------Spot Links Innen Vorne;31;6;Bühne,Links,Bühne Links,Bühne Vorne,Bühne Innen,Bühne Links Innen,Bühne Links Vorne---Spot Rechts Innen Vorne;37;6;Bühne,Rechts,Bühne Rechts,Bühne Vorne,Bühne Innen,Bühne Rechts Innen,Bühne Rechts Vorne------Spot Links Oben;49;6;Spots,Spots Links,Spots Oben,Links---Spot Links Unten;55;6;Spots,Spots Links,Spots Unten,Links---Spot Rechts Oben;61;6;Spots,Spots Rechts,Spots Oben,Rechts---Spot Rechts Unten;67;6;Spots,Spots Rechts,Spots Unten,Rechts";
+  // old (07/18/2023) "Spot Links Außen Hinten;1;6;Bühne,Links,Bühne Links,Bühne Hinten,Bühne Außen,Bühne Links Außen,Bühne Links Hinten---Bühne Links Innen Hinten;7;1;Bühne,Links,Bühne Links,Bühne Hinten,Bühne Innen,Bühne Links Innen,Bühne Links Hinten---Bühne Rechts Innen Hinten;13;1;Bühne,Rechts,Bühne Rechts,Bühne Hinten,Bühne Innen,Bühne Rechts Innen,Bühne Rechts Hinten---Spot Rechts Außen Hinten;19;6;Bühne,Rechts,Bühne Rechts,Bühne Hinten,Bühne Außen,Bühne Rechts Außen,Bühne Rechts Hinten---Bühne Links Außen Vorne;25;1;Bühne,Links,Bühne Links,Bühne Vorne,Bühne Außen,Bühne Links Außen,Bühne Links Vorne---Bühne Links Innen Vorne;31;1;Bühne,Links,Bühne Links,Bühne Vorne,Bühne Innen,Bühne Links Innen,Bühne Links Vorne---Bühne Rechts Innen Vorne;37;1;Bühne,Rechts,Bühne Rechts,Bühne Vorne,Bühne Innen,Bühne Rechts Innen,Bühne Rechts Vorne---Bühne Rechts Außen Vorne;43;1;Bühne,Rechts,Bühne Rechts,Bühne Vorne,Bühne Außen,Bühne Rechts Außen,Bühne Rechts Vorne---Spot Links Oben;49;6;Spots,Spots Links,Spots Oben,Links---Spot Links Unten;55;6;Spots,Spots Links,Spots Unten,Links---Spot Rechts Oben;61;6;Spots,Spots Rechts,Spots Oben,Rechts---Spot Rechts Unten;67;6;Spots,Spots Rechts,Spots Unten,Rechts---Spot Bühne Vorne Links;73;6;Bühne,Links,Bühne Links,Bühne Vorne,Bühne Links Vorne---------Spot Bühne Vorne Rechts;79;6;Bühne,Rechts,Bühne Rechts,Bühne Vorne,Bühne Rechts Vorne";
   // old (07/06/2023) "Bühne Links Außen Hinten;1;1;Bühne,Links,Bühne Links,Bühne Hinten,Bühne Außen,Bühne Links Außen,Bühne Links Hinten---Bühne Links Innen Hinten;7;1;Bühne,Links,Bühne Links,Bühne Hinten,Bühne Innen,Bühne Links Innen,Bühne Links Hinten---Bühne Rechts Innen Hinten;13;1;Bühne,Rechts,Bühne Rechts,Bühne Hinten,Bühne Innen,Bühne Rechts Innen,Bühne Rechts Hinten---Bühne Rechts Außen Hinten;19;1;Bühne,Rechts,Bühne Rechts,Bühne Hinten,Bühne Außen,Bühne Rechts Außen,Bühne Rechts Hinten---Bühne Links Außen Vorne;25;1;Bühne,Links,Bühne Links,Bühne Vorne,Bühne Außen,Bühne Links Außen,Bühne Links Vorne---Bühne Links Innen Vorne;31;1;Bühne,Links,Bühne Links,Bühne Vorne,Bühne Innen,Bühne Links Innen,Bühne Links Vorne---Bühne Rechts Innen Vorne;37;1;Bühne,Rechts,Bühne Rechts,Bühne Vorne,Bühne Innen,Bühne Rechts Innen,Bühne Rechts Vorne---Bühne Rechts Außen Vorne;43;1;Bühne,Rechts,Bühne Rechts,Bühne Vorne,Bühne Außen,Bühne Rechts Außen,Bühne Rechts Vorne---Spot Links Oben;49;6;Spots,Spots Links,Spots Oben,Links---Spot Links Unten;55;6;Spots,Spots Links,Spots Unten,Links---Spot Rechts Oben;61;6;Spots,Spots Rechts,Spots Oben,Rechts---Spot Rechts Unten;67;6;Spots,Spots Rechts,Spots Unten,Rechts";
   console.debug("Loaded config", lightConfig);
   const RGBchannels = [
@@ -373,8 +375,8 @@
     ) => {
       if (!document.getElementById(`controlsGroup`)) return;
       document.getElementById(`controlsGroup-color`).value = pickedColorHex;
-      document.getElementById(`controlsGroup-dimm`).value = pickedDimm;
-      document.getElementById(`controlsGroup-fade`).value = pickedFade;
+      document.getElementById(`controlsGroup-dimm`).value = pickedDimm ?? 0;
+      document.getElementById(`controlsGroup-fade`).value = pickedFade ?? 0;
       functions.appendToChannels(`controlsGroup`, pickedChannels);
     };
 
@@ -457,16 +459,16 @@
           if (lights_.length > 0) {
             functions.append(
               lights_.map((addr) => functions.getLightByAddr(addr)),
-              dimm,
-              fade,
+              dimm ?? 0,
+              fade ?? 0,
               hex,
               channelValues
             );
 
             functions.append(
               "master",
-              dimm,
-              fade,
+              dimm ?? 0,
+              fade ?? 0,
               hex,
               channelValues,
               "controlsGroup"
@@ -504,8 +506,8 @@
 
         let isRGB = parseInt(light.split(";")[2]) > 1;
 
-        document.getElementById(`${groupName_}-dimm`).value = pickedDimm;
-        document.getElementById(`${groupName_}-fade`).value = pickedFade;
+        document.getElementById(`${groupName_}-dimm`).value = pickedDimm ?? 0;
+        document.getElementById(`${groupName_}-fade`).value = pickedFade ?? 0;
         if (!isRGB) return;
         document.getElementById(`${groupName_}-color`).value = pickedColorHex;
         functions.appendToChannels(groupName_, pickedChannels);
@@ -1434,6 +1436,67 @@
 
       if (selectPreset) presetSelector.value = selectPreset;
     };
+
+    static appendEffect = () => {
+      let effectContainer = document.createElement("div");
+      effectContainer.id = "effectContainer";
+
+      let effectStrobe = document.createElement("button");
+      let effectFlash = document.createElement("button");
+      // let effectOff = document.createElement("button");
+
+      effectStrobe.innerText = "Strobe";
+      effectFlash.innerText = "Flash";
+      // effectOff.innerText = "Effect Off";
+
+      let effectElems = [effectStrobe, effectFlash];
+      let effectCommands = [
+        ["strobe_on", "effect_off", "effectButton-strobe-active"],
+        ["flash_on", "effect_off", "effectButton-flash-active"],
+      ];
+      let effectEnabled;
+
+      [effectStrobe, effectFlash].forEach((a) => {
+        a.setAttribute("state", "0");
+        effectContainer.appendChild(a);
+        a.classList.add("effectButton");
+
+        a.onclick = () => {
+          switch (a.getAttribute("state")) {
+            case "0": {
+              if (effectEnabled) return console.error("effect already enabled");
+              a.setAttribute("state", "1");
+              a.classList.add(effectCommands[effectElems.indexOf(a)][2]);
+              effectElems
+                .filter((b) => b !== a)
+                .forEach((b) => {
+                  b.setAttribute("disabled", true);
+                });
+
+              ws.send(effectCommands[effectElems.indexOf(a)][0]);
+              effectEnabled = a;
+              break;
+            }
+
+            case "1": {
+              if (!effectEnabled) return console.error("effect not enabled");
+              a.setAttribute("state", "0");
+              a.classList.remove(effectCommands[effectElems.indexOf(a)][2]);
+              effectElems
+                .filter((b) => b !== a)
+                .forEach((b) => {
+                  b.removeAttribute("disabled");
+                });
+              ws.send(effectCommands[effectElems.indexOf(a)][1]);
+              effectEnabled = undefined;
+              break;
+            }
+          }
+        };
+      });
+
+      document.querySelector("body").appendChild(effectContainer);
+    };
   }
 
   class elements {
@@ -1706,6 +1769,7 @@
     scripts.appendChannelsToggle();
     scripts.appendPresetSelector();
     scripts.appendRestartRefreshButtons();
+    scripts.appendEffect();
     resolve();
     elementsLoaded = undefined;
   });
@@ -2034,6 +2098,7 @@
     top: 10px;
   }
 
+  .effectButton,
   .quickActionButton {
     display: flex;
     border-radius: 6px;
@@ -2043,6 +2108,7 @@
     color: #f1faee;
   }
 
+  .effectButton:disabled,
   .quickActionButton:disabled {
     color: grey;
   }
@@ -2103,5 +2169,52 @@
     border: transparent;
     margin: 3px;
     background-color: red;
+  }
+
+  #effectContainer {
+    display: flex;
+    position: absolute;
+    flex-wrap: nowrap;
+    top: 5px;
+    left: 65vw;
+  }
+
+  @keyframes effectStrobeActive {
+    0%,
+    30% {
+      background-color: #f00;
+      color: black;
+    }
+
+    33%,
+    63% {
+      background-color: #0f0;
+      color: black;
+    }
+
+    66%,
+    100% {
+      background-color: #00f;
+      color: white;
+    }
+  }
+
+  @keyframes effectFlashActive {
+    0% {
+      background-color: black;
+      color: white;
+    }
+    100% {
+      background-color: #fff;
+      color: black;
+    }
+  }
+
+  .effectButton-strobe-active {
+    animation: effectStrobeActive 1s infinite;
+  }
+
+  .effectButton-flash-active {
+    animation: effectFlashActive 200ms infinite;
   }
 </style>
