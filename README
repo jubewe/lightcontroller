@@ -1,20 +1,20 @@
 --- 1.0 Einleitung ---
 
-  Diese Software wurde von 2 Schülern der Schule / Bühnentechnik geschrieben und ist unter der Gnu General Public License (Version 3) Lizensiert (https://www.gnu.org/licenses/gpl-3.0.en.html)
+  Diese Software wurde von 2 Schülern der Schule / Bühnentechnik geschrieben und ist unter der Gnu General Public License (Version 3) lizenziert (https://www.gnu.org/licenses/gpl-3.0.en.html)
 
   GitHub Repository: https://github.com/jubewe/lightcontroller
   CAD Case: https://cad.onshape.com/documents/32544a06e8ec4764e1459a3b/w/4d291bb81697a02a01b341a5/e/0fd6ec4ab97829387aade676
 
 
 --- 1.0.2 Verbindung ---
-  Um den Lightcontroller bedienen zu können, verbinde dich per WLAN dem Gerät:
+  Um den Lightcontroller bedienen zu können, verbinde dich per WLAN dem Gerät (am Handy Mobile Daten ausschalten):
   SSID:   lightcontroller
   PW:     password
 
   Nach erfolgreichem Verbinden, gehe auf http://192.168.4.1.
   Dort findest du das Webinterface für den Controller.
 
-  Beim Abrufen der Seite wird anfangs der aktuelle Status der Lichter abgefragt und synchronisiert, 
+  Beim Abrufen der Seite wird anfangs der aktuelle Status der Lichter abgefragt und synchronisiert
 
 
 --- 1.1 Gruppen von Lichtern ---
@@ -65,8 +65,7 @@ Syntax:
 
 --- 1.2 DMX-Addressen ---
 
-  Für jeden Scheinwerfer, egal ob LED oder nicht, sind je 6 Kanäle reserviert (für Kompatibilität von neuen LED Scheinwerfern)
-  → Bei den nicht-LEDs wird jedoch nur der jeweils Erste genutzt
+  Für jeden Scheinwerfer, egal ob RGB-LED oder nicht, sind je 6 Kanäle reserviert (für Kompatibilität von neuen LED Scheinwerfern)
 
   Da das DMX-Protokoll genutzt wird, kann jedem Kanal ein Wert von 0 bis 255 zugewiesen werden
 
@@ -100,16 +99,42 @@ Syntax:
 
 --- 1.3 Presets ---
 
-Es besteht die Möglichkeit, lokal Presets zu erstellen, die die Werte der Kanäle speichern.
+Es besteht die Möglichkeit, lokale Presets zu erstellen, die die Werte der Kanäle speichern.
 Dies kann genutzt werden, um schnell zwischen Bühnenbildern (wie Rede und Musik) zu wechseln.
-
+Sie werden aber nur lokal auf dem aktuellen Gerät gespeichert, können aber exportiert werden.
+Wichtig: Keine Leerzeichen in Presetnamen!
 
 --- 1.3.1 Speicherung der Presets ---
 
 Format:
 <dmx-start>,<r>,<g>,<b>,<w>,<a>,<u>,<dimm>,<fade>
 
+--- 1.4 Known Bugs ---
+
+- Der "flash" Effekt funktioniert nicht
+- fade ist teilweise nicht stable -> reconnect oder restart
+- DMX Output ist langsam/Latenz (evtl. neu flashen mit kleinerer "maxLights" Variable)
+
+
+--- 1.5 Flashen der Controller (neue Firmware) ---
+
+- mit VisualStudioCode und Platform.io Extension mit angepasster DMX-library
+- Ordner "backend" für master (1x) aktuell hinten links über der Bühne (Leiter und langes USB-C <-> USB-A Kabel)
+- Ordner "backend-receiver" für beliebig viele receiver Module (neue MAC Addressen müssen im master code für die Verbindung mit ESP-Now eingetragen werden)
+- BOOT Button halten während USB-Eingesteckt wird (manchmal notwendig)
+
+--- 1.6 Notizen zur Hardware/PCB ---
+
+- Schaltplan und PCB-Layout in diesem git-repo (pcb Ordner)
+- gerber Dateien für Nachbestellung bei jlcpcb unter "pcb/gerbers_REV1.1/gerbers.zip")
+- das Quartz (Y1) und die beiden Kondensatoren (C12,C13) sowie R16 und R17 werden nicht benötigt
+- genau Teileliste "parts.ods" mit Bestellnummern für LCSC
 
 --- x.1 Sonstiges ---
 
 Die Website frägt am Anfang den aktuellen Status der Lichter vom Master ab, die Werte überschreiben dann die aktuellen Werte
+
+Arduino Lib espdmx:  https://github.com/Rickgg/ESP-Dmx
+→ Example:  https://github.com/Rickgg/ESP-Dmx/blob/master/examples/RGB_DMX/RGB_DMX.ino#L10 
+
+DMX Addresses:  https://www.thedmxwiki.com/dmx_basics/dmx_addresses 
